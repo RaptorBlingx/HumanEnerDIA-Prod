@@ -1,0 +1,720 @@
+[
+    {
+        "id": "enms_pipeline_tab",
+        "type": "tab",
+        "label": "EnMS Data Pipeline",
+        "disabled": false,
+        "info": "Main data ingestion pipeline for EnMS\n\nSubscribes to MQTT topics and inserts data into TimescaleDB"
+    },
+    {
+        "id": "mqtt_broker_config",
+        "type": "mqtt-broker",
+        "name": "EnMS MQTT Broker",
+        "broker": "${MQTT_HOST}",
+        "port": "${MQTT_PORT}",
+        "tls": "",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": "",
+        "credentials": {
+            "user": "${MQTT_USERNAME}",
+            "password": "${MQTT_PASSWORD}"
+        },
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "f1b784ca20120cfd",
+        "type": "postgreSQLConfig",
+        "name": "",
+        "host": "${POSTGRES_HOST}",
+        "hostFieldType": "str",
+        "port": "${POSTGRES_PORT}",
+        "portFieldType": "num",
+        "database": "${POSTGRES_DB}",
+        "databaseFieldType": "str",
+        "ssl": "false",
+        "sslFieldType": "bool",
+        "applicationName": "",
+        "applicationNameType": "str",
+        "max": "10",
+        "maxFieldType": "num",
+        "idle": "1000",
+        "idleFieldType": "num",
+        "connectionTimeout": "10000",
+        "connectionTimeoutFieldType": "num",
+        "user": "${POSTGRES_USER}",
+        "userFieldType": "str",
+        "password": "${POSTGRES_PASSWORD}",
+        "passwordFieldType": "str"
+    },
+    {
+        "id": "becc22b8f4461a4d",
+        "type": "mqtt-broker",
+        "name": "",
+        "broker": "${MQTT_HOST}",
+        "port": "${MQTT_PORT}",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": "",
+        "credentials": {
+            "user": "${MQTT_USERNAME}",
+            "password": "${MQTT_PASSWORD}"
+        },
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "6d13ac5b8da148e5",
+        "type": "mqtt-broker",
+        "name": "",
+        "broker": "${MQTT_HOST}",
+        "port": "${MQTT_PORT}",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": "",
+        "credentials": {
+            "user": "${MQTT_USERNAME}",
+            "password": "${MQTT_PASSWORD}"
+        },
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "4c478c7f7b0c2a8e",
+        "type": "postgreSQLConfig",
+        "name": "",
+        "host": "postgres",
+        "hostFieldType": "str",
+        "port": "5432",
+        "portFieldType": "num",
+        "database": "enms",
+        "databaseFieldType": "str",
+        "ssl": "false",
+        "sslFieldType": "bool",
+        "applicationName": "",
+        "applicationNameType": "str",
+        "max": "10",
+        "maxFieldType": "num",
+        "idle": "1000",
+        "idleFieldType": "num",
+        "connectionTimeout": "10000",
+        "connectionTimeoutFieldType": "num",
+        "user": "${POSTGRES_USER}",
+        "userFieldType": "str",
+        "password": "${POSTGRES_PASSWORD}",
+        "passwordFieldType": "str"
+    },
+    {
+        "id": "mqtt_subscribe_all",
+        "type": "mqtt in",
+        "z": "enms_pipeline_tab",
+        "name": "Subscribe: factory/#",
+        "topic": "factory/#",
+        "qos": "1",
+        "datatype": "auto-detect",
+        "broker": "6d13ac5b8da148e5",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 130,
+        "y": 100,
+        "wires": [
+            [
+                "parse_topic",
+                "a48bc1f5174833a2"
+            ]
+        ]
+    },
+    {
+        "id": "parse_topic",
+        "type": "function",
+        "z": "enms_pipeline_tab",
+        "name": "Parse Topic",
+        "func": "// Parse MQTT topic: factory/{factory_id}/{machine_name}/{data_type}\nconst parts = msg.topic.split('/');\n\nif (parts.length !== 4) {\n    node.warn(`Invalid topic format: ${msg.topic}`);\n    return null;\n}\n\nconst [prefix, factoryId, machineName, dataType] = parts;\n\n// Map multi-energy types to standard processing\n// electricity, natural_gas, steam → all processed as energy readings\nconst energyTypes = ['energy', 'electricity', 'natural_gas', 'steam'];\nconst validTypes = [...energyTypes, 'production', 'environmental', 'status'];\n\nif (!validTypes.includes(dataType)) {\n    node.warn(`Unknown data type: ${dataType}`);\n    return null;\n}\n\n// Add metadata to message\nmsg.factoryId = factoryId;\nmsg.machineName = machineName;\nmsg.dataType = dataType;\nmsg.energyType = energyTypes.includes(dataType) ? dataType : null;\nmsg.receivedAt = new Date().toISOString();\n\n// Validate payload\nif (!msg.payload || typeof msg.payload !== 'object') {\n    node.warn(`Invalid payload for ${msg.topic}`);\n    return null;\n}\n\n// Map multi-energy types to 'energy' for routing\n// This ensures electricity/natural_gas/steam go to energy processing\nif (energyTypes.includes(dataType) && dataType !== 'energy') {\n    msg.dataType = 'energy';  // Route to energy processor\n    msg.originalDataType = dataType;  // Preserve original for later\n}\n\nreturn [msg];\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 310,
+        "y": 100,
+        "wires": [
+            [
+                "route_by_type"
+            ]
+        ]
+    },
+    {
+        "id": "route_by_type",
+        "type": "switch",
+        "z": "enms_pipeline_tab",
+        "name": "Route by Type",
+        "property": "dataType",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "energy",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "production",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "environmental",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "status",
+                "vt": "str"
+            }
+        ],
+        "checkall": "false",
+        "repair": false,
+        "outputs": 4,
+        "x": 490,
+        "y": 100,
+        "wires": [
+            [
+                "process_energy"
+            ],
+            [
+                "process_production"
+            ],
+            [
+                "process_environmental"
+            ],
+            [
+                "process_status"
+            ]
+        ]
+    },
+    {
+        "id": "process_energy",
+        "type": "function",
+        "z": "enms_pipeline_tab",
+        "name": "Process Energy",
+        "func": "// Process energy reading for database insertion\n// Multi-energy support via energy_type column + metadata JSONB\nconst p = msg.payload;\n\n// Determine energy type\nconst energyType = msg.originalDataType || msg.energyType || 'electricity';\n\n// Validate required fields\nif (!p.timestamp && !p.time) {\n    node.warn('Missing timestamp');\n    return null;\n}\n\nif (!p.machine_id) {\n    node.warn('Missing machine_id');\n    return null;\n}\n\nconst timestamp = p.timestamp || p.time;\n\n// Prepare metadata object for non-electricity energy types\nlet metadata = {};\n\nif (energyType === 'natural_gas') {\n    metadata = {\n        flow_rate_m3h: p.flow_rate_m3h,\n        consumption_m3: p.consumption_m3,\n        pressure_bar: p.pressure_bar,\n        temperature_c: p.temperature_c,\n        calorific_value_kwh_m3: p.calorific_value_kwh_m3\n    };\n    // Map gas consumption to power equivalent for universal table\n    // 1 m³ gas ≈ 10.55 kWh\n    var power_kw = (p.flow_rate_m3h || 0) * 10.55;\n    var energy_kwh = (p.consumption_m3 || 0) * 10.55;\n} else if (energyType === 'steam') {\n    metadata = {\n        flow_rate_kg_h: p.flow_rate_kg_h,\n        consumption_kg: p.consumption_kg,\n        pressure_bar: p.pressure_bar,\n        temperature_c: p.temperature_c,\n        enthalpy_kj_kg: p.enthalpy_kj_kg\n    };\n    // Map steam to power equivalent\n    // 1 kg steam ≈ 2.26 kWh (latent heat at 10 bar)\n    var power_kw = (p.flow_rate_kg_h || 0) * 2.26;\n    var energy_kwh = (p.consumption_kg || 0) * 2.26;\n} else {\n    // Electricity (standard path)\n    metadata = {};\n    var power_kw = p.power_kw;\n    var energy_kwh = p.energy_kwh;\n}\n\n// Prepare SQL query with energy_type column\nmsg.query = `\n    INSERT INTO energy_readings (\n        time, machine_id, energy_type, power_kw, energy_kwh,\n        voltage_v, current_a, power_factor, frequency_hz,\n        source, metadata\n    ) VALUES (\n        $1, $2, $3, $4, $5, $6, $7, $8, $9, 'mqtt', $10\n    )\n    ON CONFLICT (time, machine_id, energy_type) DO UPDATE SET\n        power_kw = EXCLUDED.power_kw,\n        energy_kwh = EXCLUDED.energy_kwh,\n        metadata = EXCLUDED.metadata\n`;\n\nmsg.params = [\n    timestamp,\n    p.machine_id,\n    energyType,\n    power_kw,\n    energy_kwh,\n    p.voltage_v || null,\n    p.current_a || null,\n    p.power_factor || null,\n    p.frequency_hz || null,\n    JSON.stringify(metadata)\n];\n\nmsg.table = 'energy_readings';\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 700,
+        "y": 40,
+        "wires": [
+            [
+                "160e9dbf9ab3a0b8"
+            ]
+        ]
+    },
+    {
+        "id": "process_production",
+        "type": "function",
+        "z": "enms_pipeline_tab",
+        "name": "Process Production",
+        "func": "// Validate and prepare production data for database insertion\nconst p = msg.payload;\n\n// Validate required fields\nif (!p.time || !p.machine_id || p.production_count === undefined) {\n    node.warn('Missing required fields in production data');\n    return null;\n}\n\n// Prepare SQL query\nmsg.query = `\n    INSERT INTO production_data (\n        time, machine_id, production_count,\n        production_count_good, production_count_bad,\n        throughput_units_per_hour, operating_mode,\n        speed_percent, recipe_id, batch_id\n    ) VALUES (\n        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10\n    )\n    ON CONFLICT (time, machine_id) DO UPDATE SET\n        production_count = EXCLUDED.production_count,\n        production_count_good = EXCLUDED.production_count_good,\n        production_count_bad = EXCLUDED.production_count_bad,\n        throughput_units_per_hour = EXCLUDED.throughput_units_per_hour,\n        operating_mode = EXCLUDED.operating_mode,\n        speed_percent = EXCLUDED.speed_percent\n`;\n\nmsg.params = [\n    p.time,\n    p.machine_id,\n    p.production_count,\n    p.production_count_good || 0,\n    p.production_count_bad || 0,\n    p.throughput_units_per_hour || null,\n    p.operating_mode || 'idle',\n    p.speed_percent || null,\n    p.recipe_id || null,\n    p.batch_id || null\n];\n\nmsg.table = 'production_data';\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 710,
+        "y": 100,
+        "wires": [
+            [
+                "0f52692506770b7f"
+            ]
+        ]
+    },
+    {
+        "id": "process_environmental",
+        "type": "function",
+        "z": "enms_pipeline_tab",
+        "name": "Process Environmental",
+        "func": "// Validate and prepare environmental data for database insertion\nconst p = msg.payload;\n\n// Validate required fields\nif (!p.time || !p.machine_id) {\n    node.warn('Missing required fields in environmental data');\n    return null;\n}\n\n// Prepare SQL query\nmsg.query = `\n    INSERT INTO environmental_data (\n        time, machine_id,\n        outdoor_temp_c, indoor_temp_c, machine_temp_c,\n        outdoor_humidity_percent, indoor_humidity_percent,\n        pressure_bar, flow_rate_m3h,\n        supply_air_temp_c, return_air_temp_c, cop,\n        vibration_mm_s\n    ) VALUES (\n        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13\n    )\n    ON CONFLICT (time, machine_id) DO UPDATE SET\n        outdoor_temp_c = EXCLUDED.outdoor_temp_c,\n        indoor_temp_c = EXCLUDED.indoor_temp_c,\n        machine_temp_c = EXCLUDED.machine_temp_c,\n        pressure_bar = EXCLUDED.pressure_bar,\n        flow_rate_m3h = EXCLUDED.flow_rate_m3h,\n        vibration_mm_s = EXCLUDED.vibration_mm_s\n`;\n\nmsg.params = [\n    p.time,\n    p.machine_id,\n    p.outdoor_temp_c || null,\n    p.indoor_temp_c || null,\n    p.machine_temp_c || null,\n    p.outdoor_humidity_percent || null,\n    p.indoor_humidity_percent || null,\n    p.pressure_bar || null,\n    p.flow_rate_m3h || null,\n    p.supply_air_temp_c || null,\n    p.return_air_temp_c || null,\n    p.cop || null,\n    p.vibration_mm_s || null\n];\n\nmsg.table = 'environmental_data';\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 720,
+        "y": 160,
+        "wires": [
+            [
+                "8487a044c365af2c"
+            ]
+        ]
+    },
+    {
+        "id": "process_status",
+        "type": "function",
+        "z": "enms_pipeline_tab",
+        "name": "Process Status",
+        "func": "// Validate and prepare status update for database\nconst p = msg.payload;\n\n// Validate required fields\nif (!p.machine_id) {\n    node.warn('Missing machine_id in status update');\n    return null;\n}\n\n// Prepare SQL query for upsert\nmsg.query = `\n    INSERT INTO machine_status (\n        machine_id, is_running, current_mode, current_power_kw,\n        last_updated\n    ) VALUES (\n        $1, $2, $3, $4, NOW()\n    )\n    ON CONFLICT (machine_id) DO UPDATE SET\n        is_running = EXCLUDED.is_running,\n        current_mode = EXCLUDED.current_mode,\n        current_power_kw = EXCLUDED.current_power_kw,\n        last_updated = NOW()\n`;\n\nmsg.params = [\n    p.machine_id,\n    p.is_running || false,\n    p.operating_mode || 'offline',\n    p.current_power_kw || 0\n];\n\nmsg.table = 'machine_status';\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 700,
+        "y": 220,
+        "wires": [
+            [
+                "9bdb03656205c399"
+            ]
+        ]
+    },
+    {
+        "id": "count_success",
+        "type": "function",
+        "z": "enms_pipeline_tab",
+        "name": "Count Success",
+        "func": "// Increment success counter\nconst stats = flow.get('stats') || {\n    energy: 0,\n    production: 0,\n    environmental: 0,\n    status: 0,\n    errors: 0,\n    lastUpdate: new Date().toISOString()\n};\n\nif (msg.table) {\n    stats[msg.table.replace('_data', '').replace('_readings', '')] = \n        (stats[msg.table.replace('_data', '').replace('_readings', '')] || 0) + 1;\n}\n\nstats.lastUpdate = new Date().toISOString();\nflow.set('stats', stats);\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1300,
+        "y": 160,
+        "wires": [
+            [
+                "5529b470cc995c2b"
+            ]
+        ]
+    },
+    {
+        "id": "catch_errors",
+        "type": "catch",
+        "z": "enms_pipeline_tab",
+        "name": "Catch All Errors",
+        "scope": null,
+        "uncaught": false,
+        "x": 140,
+        "y": 300,
+        "wires": [
+            [
+                "log_error"
+            ]
+        ]
+    },
+    {
+        "id": "log_error",
+        "type": "function",
+        "z": "enms_pipeline_tab",
+        "name": "Log Error",
+        "func": "// Log error and increment counter\nconst stats = flow.get('stats') || { errors: 0 };\nstats.errors = (stats.errors || 0) + 1;\nstats.lastError = new Date().toISOString();\nstats.lastErrorMsg = msg.error?.message || 'Unknown error';\nflow.set('stats', stats);\n\nnode.error(`Pipeline error: ${msg.error?.message}`, msg);\n\n// Send to dead letter queue (could be another MQTT topic or file)\nmsg.deadLetter = true;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 340,
+        "y": 300,
+        "wires": [
+            [
+                "debug_errors"
+            ]
+        ]
+    },
+    {
+        "id": "debug_errors",
+        "type": "debug",
+        "z": "enms_pipeline_tab",
+        "name": "Error Output",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 530,
+        "y": 300,
+        "wires": []
+    },
+    {
+        "id": "stats_dashboard",
+        "type": "function",
+        "z": "enms_pipeline_tab",
+        "name": "Stats Dashboard",
+        "func": "// Get statistics\nconst stats = flow.get('stats') || {\n    energy: 0,\n    production: 0,\n    environmental: 0,\n    status: 0,\n    errors: 0,\n    lastUpdate: 'Never'\n};\n\nmsg.payload = stats;\nmsg.topic = 'Pipeline Statistics';\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 340,
+        "y": 400,
+        "wires": [
+            [
+                "debug_stats"
+            ]
+        ]
+    },
+    {
+        "id": "stats_trigger",
+        "type": "inject",
+        "z": "enms_pipeline_tab",
+        "name": "Every 30s",
+        "props": [],
+        "repeat": "30",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "x": 130,
+        "y": 400,
+        "wires": [
+            [
+                "stats_dashboard"
+            ]
+        ]
+    },
+    {
+        "id": "debug_stats",
+        "type": "debug",
+        "z": "enms_pipeline_tab",
+        "name": "Statistics",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 550,
+        "y": 400,
+        "wires": []
+    },
+    {
+        "id": "comment_1",
+        "type": "comment",
+        "z": "enms_pipeline_tab",
+        "name": "MQTT Subscription & Routing",
+        "info": "Subscribes to all factory topics and routes messages by type",
+        "x": 180,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "comment_2",
+        "type": "comment",
+        "z": "enms_pipeline_tab",
+        "name": "Data Processing & Validation",
+        "info": "Validates and prepares data for database insertion",
+        "x": 720,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "comment_3",
+        "type": "comment",
+        "z": "enms_pipeline_tab",
+        "name": "Error Handling",
+        "info": "Catches and logs all pipeline errors",
+        "x": 130,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "comment_4",
+        "type": "comment",
+        "z": "enms_pipeline_tab",
+        "name": "Monitoring Dashboard",
+        "info": "Statistics and monitoring",
+        "x": 140,
+        "y": 360,
+        "wires": []
+    },
+    {
+        "id": "9e2311d9f17480c3",
+        "type": "inject",
+        "z": "enms_pipeline_tab",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 660,
+        "y": 440,
+        "wires": [
+            [
+                "4c9fe61e4c20c92b"
+            ]
+        ]
+    },
+    {
+        "id": "4c9fe61e4c20c92b",
+        "type": "postgresql",
+        "z": "enms_pipeline_tab",
+        "name": "",
+        "query": "SELECT * FROM factories;",
+        "postgreSQLConfig": "f1b784ca20120cfd",
+        "split": false,
+        "rowsPerMsg": 1,
+        "outputs": 1,
+        "x": 850,
+        "y": 480,
+        "wires": [
+            [
+                "e189ce71390aa062"
+            ]
+        ]
+    },
+    {
+        "id": "e189ce71390aa062",
+        "type": "debug",
+        "z": "enms_pipeline_tab",
+        "name": "debug 1",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1020,
+        "y": 520,
+        "wires": []
+    },
+    {
+        "id": "160e9dbf9ab3a0b8",
+        "type": "postgresql",
+        "z": "enms_pipeline_tab",
+        "name": "",
+        "query": "INSERT INTO energy_readings (\n    time, machine_id, power_kw, energy_kwh,\n    voltage_v, current_a, power_factor, frequency_hz,\n    source\n) VALUES (\n    $1, $2, $3, $4, $5, $6, $7, $8, 'mqtt'\n)\nON CONFLICT (time, machine_id) DO UPDATE SET\n    power_kw = EXCLUDED.power_kw,\n    energy_kwh = EXCLUDED.energy_kwh,\n    voltage_v = EXCLUDED.voltage_v,\n    current_a = EXCLUDED.current_a,\n    power_factor = EXCLUDED.power_factor,\n    frequency_hz = EXCLUDED.frequency_hz",
+        "postgreSQLConfig": "4c478c7f7b0c2a8e",
+        "split": false,
+        "rowsPerMsg": 1,
+        "outputs": 1,
+        "x": 910,
+        "y": 60,
+        "wires": [
+            [
+                "count_success"
+            ]
+        ]
+    },
+    {
+        "id": "0f52692506770b7f",
+        "type": "postgresql",
+        "z": "enms_pipeline_tab",
+        "name": "",
+        "query": "INSERT INTO production_data (\n    time, machine_id, production_count,\n    production_count_good, production_count_bad,\n    throughput_units_per_hour, operating_mode,\n    speed_percent, recipe_id, batch_id\n) VALUES (\n    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10\n)\nON CONFLICT (time, machine_id) DO UPDATE SET\n    production_count = EXCLUDED.production_count,\n    production_count_good = EXCLUDED.production_count_good,\n    production_count_bad = EXCLUDED.production_count_bad,\n    throughput_units_per_hour = EXCLUDED.throughput_units_per_hour,\n    operating_mode = EXCLUDED.operating_mode,\n    speed_percent = EXCLUDED.speed_percent",
+        "postgreSQLConfig": "f1b784ca20120cfd",
+        "split": false,
+        "rowsPerMsg": 1,
+        "outputs": 1,
+        "x": 910,
+        "y": 120,
+        "wires": [
+            [
+                "count_success"
+            ]
+        ]
+    },
+    {
+        "id": "8487a044c365af2c",
+        "type": "postgresql",
+        "z": "enms_pipeline_tab",
+        "name": "",
+        "query": "INSERT INTO environmental_data (\n    time, machine_id,\n    outdoor_temp_c, indoor_temp_c, machine_temp_c,\n    outdoor_humidity_percent, indoor_humidity_percent,\n    pressure_bar, flow_rate_m3h,\n    supply_air_temp_c, return_air_temp_c, cop,\n    vibration_mm_s\n) VALUES (\n    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13\n)\nON CONFLICT (time, machine_id) DO UPDATE SET\n    outdoor_temp_c = EXCLUDED.outdoor_temp_c,\n    indoor_temp_c = EXCLUDED.indoor_temp_c,\n    machine_temp_c = EXCLUDED.machine_temp_c,\n    pressure_bar = EXCLUDED.pressure_bar,\n    flow_rate_m3h = EXCLUDED.flow_rate_m3h,\n    vibration_mm_s = EXCLUDED.vibration_mm_s",
+        "postgreSQLConfig": "f1b784ca20120cfd",
+        "split": false,
+        "rowsPerMsg": 1,
+        "outputs": 1,
+        "x": 930,
+        "y": 160,
+        "wires": [
+            [
+                "count_success"
+            ]
+        ]
+    },
+    {
+        "id": "9bdb03656205c399",
+        "type": "postgresql",
+        "z": "enms_pipeline_tab",
+        "name": "",
+        "query": "INSERT INTO machine_status (\n    machine_id, is_running, current_mode, current_power_kw,\n    last_updated\n) VALUES (\n    $1, $2, $3, $4, NOW()\n)\nON CONFLICT (machine_id) DO UPDATE SET\n    is_running = EXCLUDED.is_running,\n    current_mode = EXCLUDED.current_mode,\n    current_power_kw = EXCLUDED.current_power_kw,\n    last_updated = NOW()",
+        "postgreSQLConfig": "f1b784ca20120cfd",
+        "split": false,
+        "rowsPerMsg": 1,
+        "outputs": 1,
+        "x": 930,
+        "y": 220,
+        "wires": [
+            [
+                "count_success"
+            ]
+        ]
+    },
+    {
+        "id": "5529b470cc995c2b",
+        "type": "debug",
+        "z": "enms_pipeline_tab",
+        "name": "debug 2",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": true,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "payload",
+        "statusType": "auto",
+        "x": 1500,
+        "y": 200,
+        "wires": []
+    },
+    {
+        "id": "a48bc1f5174833a2",
+        "type": "debug",
+        "z": "enms_pipeline_tab",
+        "name": "debug 3",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 270,
+        "y": 200,
+        "wires": []
+    }
+]

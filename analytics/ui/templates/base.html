@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}EnMS Analytics{% endblock %}</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Industrial Design System -->
+    <link rel="stylesheet" href="/css/enms-industrial.css">
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
+    <!-- Sidebar Component -->
+    <link rel="stylesheet" href="/css/sidebar.css?v=1765871462">
+    
+    <!-- OVOS Voice Widget CSS -->
+    <link rel="stylesheet" href="/css/ovos-voice-widget.css?v=20260108f">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <!-- Analytics-Specific Styles -->
+    <style>
+        /* Analytics page uses industrial design system */
+        body {
+            background-color: var(--color-background);
+        }
+        
+        .main-content {
+            padding: var(--space-8) var(--space-6);
+            min-height: calc(100vh - 120px);
+        }
+        
+        /* Chart containers */
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin: var(--space-4) 0;
+        }
+        
+        /* Stat cards for analytics */
+        .stat-card {
+            text-align: center;
+            padding: var(--space-6);
+        }
+        
+        .stat-value {
+            font-size: var(--text-4xl);
+            font-weight: var(--font-bold);
+            color: var(--color-primary);
+            margin-bottom: var(--space-2);
+        }
+        
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: var(--text-sm);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: var(--font-medium);
+        }
+        
+        /* Alert styling */
+        .alert-banner {
+            border-left: 4px solid;
+            border-radius: var(--border-radius);
+            padding: var(--space-4);
+            margin-bottom: var(--space-4);
+        }
+        
+        .alert-banner.alert-success {
+            border-left-color: var(--color-success);
+            background-color: rgba(46, 204, 113, 0.1);
+        }
+        
+        .alert-banner.alert-danger {
+            border-left-color: var(--color-error);
+            background-color: rgba(231, 76, 60, 0.1);
+        }
+        
+        .alert-banner.alert-warning {
+            border-left-color: var(--color-warning);
+            background-color: rgba(243, 156, 18, 0.1);
+        }
+        
+        /* Loading states */
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            padding: var(--space-8);
+        }
+        
+        .loading-spinner.active {
+            display: block;
+        }
+        
+        /* Dropdown menu styling */
+        .dropdown-menu {
+            background-color: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-lg);
+            padding: var(--space-2);
+            position: absolute;
+            top: 100%;
+            right: 0;
+            min-width: 220px;
+            margin-top: var(--space-2);
+            z-index: 1000;
+        }
+        
+        .industrial-nav-dropdown {
+            position: relative;
+        }
+        
+        .industrial-nav-dropdown .industrial-nav-link {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-1);
+        }
+        
+        .industrial-nav-dropdown .industrial-nav-link:hover {
+            background-color: var(--color-primary-hover);
+        }
+        
+        .industrial-nav-dropdown .industrial-nav-link.active {
+            background-color: var(--color-secondary);
+        }
+        
+        .dropdown-item {
+            color: var(--color-text-primary);
+            padding: var(--space-2) var(--space-4);
+            border-radius: var(--border-radius-sm);
+            font-size: var(--text-sm);
+            display: block;
+            text-decoration: none;
+        }
+        
+        .dropdown-item:hover {
+            background-color: var(--color-primary-light);
+            color: var(--color-white);
+        }
+        
+        .dropdown-item.active {
+            background-color: var(--color-primary);
+            color: var(--color-white);
+        }
+        
+        .dropdown-item i {
+            margin-right: var(--space-2);
+            width: 1.2rem;
+            display: inline-block;
+        }
+        
+        .dropdown-divider {
+            border-top: 1px solid var(--color-border);
+            margin: var(--space-2) 0;
+        }
+        
+        /* Navigation link styles */
+        .industrial-nav-link {
+            color: white;
+            text-decoration: none;
+            padding: var(--space-2) var(--space-4);
+            border-radius: var(--radius);
+            font-size: var(--text-sm);
+            font-weight: var(--font-medium);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: background-color 0.2s;
+        }
+        
+        .industrial-nav-link.active {
+            background-color: var(--color-secondary);
+        }
+        
+        .industrial-nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.1) !important;
+        }
+        
+        /* Dropdown button */
+        .industrial-nav-dropdown button.industrial-nav-link {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-1);
+        }
+        
+        .industrial-nav-dropdown button.industrial-nav-link.active {
+            background: var(--color-secondary);
+        }
+        
+        /* ============================================
+           UNIFIED KPI CARDS - Matching Portal Design
+           ============================================ */
+        .kpi-card-premium {
+            text-align: center;
+            padding: 24px;
+            background: linear-gradient(135deg, var(--card-bg-from, #f8f9fa) 0%, #ffffff 100%);
+            border-radius: 16px;
+            border: 1px solid var(--card-border, #e5e7eb);
+            transition: all 0.3s ease;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+        
+        .kpi-card-premium:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+            border-color: var(--card-border-hover, #d1d5db);
+        }
+        
+        /* Icon styling - matching portal */
+        .kpi-card-premium .kpi-icon {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 16px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--card-gradient-from, #0A2463) 0%, var(--card-gradient-to, #1E3A8A) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            transition: all 0.3s ease;
+        }
+        
+        .kpi-card-premium:hover .kpi-icon {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(var(--card-glow-rgb, 10, 36, 99), 0.3);
+        }
+        
+        /* Value styling - matching portal */
+        .kpi-card-premium .kpi-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: var(--card-value-color, #0A2463);
+            margin-bottom: 8px;
+            line-height: 1;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        /* Label styling - matching portal */
+        .kpi-card-premium .kpi-label {
+            font-size: 13px;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        /* Description styling - matching portal */
+        .kpi-card-premium .kpi-description {
+            font-size: 12px;
+            color: var(--card-value-color, #0A2463);
+            font-weight: 500;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 1200px) {
+            .kpi-card-premium {
+                padding: 24px 16px;
+            }
+            
+            .kpi-card-premium .kpi-value {
+                font-size: 40px;
+            }
+            
+            .kpi-card-premium .kpi-icon {
+                width: 52px;
+                height: 52px;
+                font-size: 28px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .kpi-card-premium {
+                padding: 20px 12px;
+            }
+            
+            .kpi-card-premium .kpi-value {
+                font-size: 36px;
+            }
+            
+            .kpi-card-premium .kpi-icon {
+                width: 48px;
+                height: 48px;
+                font-size: 24px;
+            }
+        }
+    </style>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Hamburger Menu Header -->
+    <header class="industrial-header" style="padding: 1rem 2rem;">
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 1rem; width: 100%;">
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <button onclick="toggleSidebar()" class="hamburger-btn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
+                <a href="/" class="industrial-logo" style="display: flex; align-items: center; gap: 0.5rem; color: white; text-decoration: none;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                    </svg>
+                    <span>HumanEnerDIA Analytics</span>
+                </a>
+            </div>
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <!-- Notification Bell -->
+                <div class="notification-bell-container">
+                    <button id="notification-bell" class="notification-bell-btn" onclick="toggleNotificationPanel()" title="Notifications">
+                        <i class="bi bi-bell-fill"></i>
+                        <span id="notification-badge" class="notification-badge" style="display: none;"></span>
+                    </button>
+                    <!-- Notification Dropdown Panel -->
+                    <div id="notification-panel" class="notification-panel" style="display: none;">
+                        <div class="notification-panel-header">
+                            <h3><i class="bi bi-bell"></i> Notifications</h3>
+                            <button onclick="clearAllNotifications()" class="clear-all-btn" title="Clear all">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                        <div id="notification-list" class="notification-list">
+                            <div class="notification-empty">
+                                <i class="bi bi-bell-slash"></i>
+                                <p>No notifications yet</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button id="ovos-enable-voice-nav" style="display: none; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 10px 20px; border-radius: 25px; cursor: pointer; font-weight: 500; align-items: center; gap: 8px; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                        <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                    </svg>
+                    <span>Enable Voice</span>
+                </button>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Sidebar will be injected by sidebar.js -->
+    
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="container-fluid">
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer style="background-color: var(--color-surface); border-top: 1px solid var(--color-border); padding: var(--space-6) 0; margin-top: var(--space-12);">
+        <div class="container-fluid">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+                <div>
+                    <p style="margin: 0; color: var(--text-secondary); font-size: var(--text-sm);">&copy; 2025 HumanEnerDIA</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Axios for API calls -->
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.5.0/dist/axios.min.js"></script>
+    
+    <!-- Common JavaScript -->
+    <script>
+        // Dropdown toggle function
+        function toggleDropdown(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            const button = event.currentTarget;
+            const dropdown = button.nextElementSibling;
+            const isVisible = dropdown.style.display === 'block';
+            
+            // Close all dropdowns
+            document.querySelectorAll('.dropdown-menu').forEach(d => d.style.display = 'none');
+            
+            // Toggle current dropdown
+            dropdown.style.display = isVisible ? 'none' : 'block';
+        }
+        
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('.industrial-nav-dropdown')) {
+                document.querySelectorAll('.dropdown-menu').forEach(d => d.style.display = 'none');
+            }
+        });
+        
+        // API configuration
+        // When accessed through nginx proxy, use /api/analytics
+        // When accessed directly, use /api/v1
+        const API_BASE = window.location.port === '8001' ? '/api/v1' : '/api/analytics/api/v1';        // Common error handler
+        function handleError(error, elementId) {
+            console.error('Error:', error);
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.innerHTML = `
+                    <div class="alert alert-danger" role="alert">
+                        <strong>Error:</strong> ${error.response?.data?.message || error.message || 'An error occurred'}
+                    </div>
+                `;
+            }
+        }
+        
+        // Show loading spinner
+        function showLoading(elementId) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.innerHTML = '<div class="loading-spinner active"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>';
+            }
+        }
+        
+        // Format date
+        function formatDate(dateString) {
+            return new Date(dateString).toLocaleString();
+        }
+        
+        // Format number
+        function formatNumber(num, decimals = 2) {
+            return parseFloat(num).toFixed(decimals);
+        }
+    </script>
+    
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Sidebar Script -->
+    <script src="/js/sidebar.js?v=1765871462"></script>
+    
+    <!-- EnMS Chatbot Widget (Rasa) -->
+    <script src="/js/chatbot-widget.js"></script>
+    
+    <!-- OVOS Voice Assistant Widget -->
+    <script src="/js/ovos-voice-widget.js?v=20260420a"></script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

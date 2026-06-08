@@ -1,0 +1,75 @@
+<!-- Data Table Component Template -->
+<div class="table-container no-break" style="margin: 1rem 0; overflow-x: auto;">
+    {% if title %}
+    <h3 class="table-title" style="font-size: 1rem; font-weight: 600; color: #1a365d; margin-bottom: 0.75rem;">
+        {{ title }}
+    </h3>
+    {% endif %}
+    
+    {% if description %}
+    <p class="table-description" style="font-size: 0.875rem; color: #718096; margin-bottom: 0.5rem;">
+        {{ description }}
+    </p>
+    {% endif %}
+    
+    <table class="data-table" style="width: 100%; border-collapse: collapse; border: 1px solid #e2e8f0;">
+        {% if headers %}
+        <thead style="background: #1a365d; color: white;">
+            <tr>
+                {% for header in headers %}
+                <th style="padding: 0.5rem; text-align: {{ header.align | default('left') }}; border: 1px solid #e2e8f0;">
+                    {{ header.label if header is mapping else header }}
+                </th>
+                {% endfor %}
+            </tr>
+        </thead>
+        {% endif %}
+        
+        <tbody>
+            {% for row in rows %}
+            <tr class="{{ 'row-highlight' if row.highlight else '' }}" 
+                style="background: {{ '#f7fafc' if loop.index % 2 == 0 else 'white' }}; {{ 'font-weight: 600;' if row.highlight else '' }}">
+                {% for cell in row.cells if row is mapping else row %}
+                <td style="padding: 0.5rem; border: 1px solid #e2e8f0; text-align: {{ cell.align | default('left') if cell is mapping else 'left' }};">
+                    {% if cell is mapping %}
+                        {% if cell.type == 'badge' %}
+                            <span class="badge badge-{{ cell.status | default('info') }}">{{ cell.value }}</span>
+                        {% elif cell.type == 'trend' %}
+                            <span class="trend {{ 'positive' if cell.value >= 0 else 'negative' }}">
+                                {{ '▲' if cell.value >= 0 else '▼' }} {{ cell.value | format_percent(1) }}
+                            </span>
+                        {% elif cell.type == 'number' %}
+                            {{ cell.value | format_number(cell.decimals | default(2)) }}
+                        {% elif cell.type == 'energy' %}
+                            {{ cell.value | format_energy(cell.unit | default('kWh')) }}
+                        {% else %}
+                            {{ cell.value }}
+                        {% endif %}
+                    {% else %}
+                        {{ cell }}
+                    {% endif %}
+                </td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </tbody>
+        
+        {% if footer %}
+        <tfoot style="background: #f7fafc; font-weight: 600;">
+            <tr>
+                {% for cell in footer %}
+                <td style="padding: 0.5rem; border: 1px solid #e2e8f0; text-align: {{ cell.align | default('left') if cell is mapping else 'left' }};">
+                    {{ cell.value if cell is mapping else cell }}
+                </td>
+                {% endfor %}
+            </tr>
+        </tfoot>
+        {% endif %}
+    </table>
+    
+    {% if caption %}
+    <p class="table-caption" style="font-size: 0.75rem; color: #718096; margin-top: 0.5rem; font-style: italic;">
+        {{ caption }}
+    </p>
+    {% endif %}
+</div>

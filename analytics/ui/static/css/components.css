@@ -1,0 +1,629 @@
+/**
+ * EnMS v3 Component Library Styles
+ * 
+ * @file components.css
+ * @description Unified stylesheet for all reusable UI components
+ * @version 3.0.0
+ * @date November 10, 2025
+ */
+
+/* ============================================================================
+   CSS VARIABLES (Design System)
+   ========================================================================= */
+
+:root {
+  /* Primary Colors */
+  --primary-blue: #1e3a8a;
+  --primary-dark: #0f172a;
+  
+  /* Status Colors */
+  --success-green: #10b981;
+  --warning-orange: #f59e0b;
+  --danger-red: #ef4444;
+  --info-blue: #3b82f6;
+  
+  /* Neutral Grays */
+  --gray-50: #f9fafb;
+  --gray-100: #f3f4f6;
+  --gray-200: #e5e7eb;
+  --gray-500: #6b7280;
+  --gray-800: #1f2937;
+  
+  /* Energy Source Colors */
+  --electricity-color: #3b82f6;
+  --natural-gas-color: #f59e0b;
+  --steam-color: #ef4444;
+  --compressed-air-color: #10b981;
+  
+  /* Spacing (4px base) */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  
+  /* Typography */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-normal: 300ms ease;
+  --transition-slow: 500ms ease;
+}
+
+/* ============================================================================
+   LOADING SPINNER COMPONENT
+   ========================================================================= */
+
+.loading-spinner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+}
+
+.loading-spinner.mode-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+}
+
+.loading-spinner .spinner-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(2px);
+}
+
+.loading-spinner .spinner-content {
+  position: relative;
+  z-index: 1001;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.spinner {
+  display: inline-flex;
+  gap: var(--space-2);
+}
+
+.spinner-circle {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--primary-blue);
+  animation: spinner-bounce 1.4s infinite ease-in-out both;
+}
+
+.spinner-circle:nth-child(1) {
+  animation-delay: -0.32s;
+}
+
+.spinner-circle:nth-child(2) {
+  animation-delay: -0.16s;
+}
+
+/* Spinner sizes */
+.spinner-sm .spinner-circle {
+  width: 8px;
+  height: 8px;
+}
+
+.spinner-lg .spinner-circle {
+  width: 16px;
+  height: 16px;
+}
+
+/* Spinner colors */
+.spinner.color-white .spinner-circle {
+  background: white;
+}
+
+.loading-message {
+  font-size: var(--text-sm);
+  color: var(--gray-800);
+  margin: 0;
+}
+
+.mode-overlay .loading-message {
+  color: white;
+}
+
+@keyframes spinner-bounce {
+  0%, 80%, 100% {
+    transform: scale(0);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.fade-out {
+  animation: fadeOut var(--transition-normal);
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+/* ============================================================================
+   ERROR MESSAGE COMPONENT
+   ========================================================================= */
+
+.error-message {
+  display: flex;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-radius: 8px;
+  border-left: 4px solid;
+  margin-bottom: var(--space-4);
+  animation: slideIn var(--transition-normal);
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.error-message.type-error {
+  background: #fef2f2;
+  border-color: var(--danger-red);
+  color: #991b1b;
+}
+
+.error-message.type-warning {
+  background: #fffbeb;
+  border-color: var(--warning-orange);
+  color: #92400e;
+}
+
+.error-message.type-info {
+  background: #eff6ff;
+  border-color: var(--info-blue);
+  color: #1e40af;
+}
+
+.error-message.type-success {
+  background: #f0fdf4;
+  border-color: var(--success-green);
+  color: #166534;
+}
+
+.error-icon {
+  flex-shrink: 0;
+  font-size: var(--text-xl);
+}
+
+.error-content {
+  flex: 1;
+}
+
+.error-text {
+  margin: 0 0 var(--space-2) 0;
+  font-size: var(--text-base);
+}
+
+.error-actions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.btn-retry, .btn-dismiss {
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--text-sm);
+  border: 1px solid currentColor;
+  background: transparent;
+  color: inherit;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-retry:hover {
+  background: currentColor;
+  color: white;
+}
+
+.btn-dismiss {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border-radius: 50%;
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.btn-dismiss:hover {
+  background: currentColor;
+  color: white;
+}
+
+/* ============================================================================
+   SEU SELECTOR COMPONENT
+   ========================================================================= */
+
+.seu-selector {
+  margin-bottom: var(--space-4);
+}
+
+.seu-selector label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: var(--space-2);
+  color: var(--gray-800);
+}
+
+.seu-selector select.form-control {
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--text-base);
+  border: 2px solid var(--gray-200);
+  border-radius: 6px;
+  background: white;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.seu-selector select.form-control:hover {
+  border-color: var(--primary-blue);
+}
+
+.seu-selector select.form-control:focus {
+  outline: none;
+  border-color: var(--primary-blue);
+  box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+}
+
+.seu-selector .text-muted {
+  display: block;
+  margin-top: var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--gray-500);
+}
+
+/* Multi-select mode */
+.seu-selector.multi-select .seu-list {
+  max-height: 300px;
+  overflow-y: auto;
+  border: 2px solid var(--gray-200);
+  border-radius: 6px;
+  padding: var(--space-2);
+}
+
+.seu-option {
+  padding: var(--space-2);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  border-radius: 4px;
+  transition: background var(--transition-fast);
+}
+
+.seu-option:hover {
+  background: var(--gray-50);
+}
+
+.seu-option input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.seu-option label {
+  margin: 0;
+  font-weight: normal;
+  cursor: pointer;
+  flex: 1;
+}
+
+.seu-option small {
+  color: var(--gray-500);
+}
+
+/* ============================================================================
+   ENERGY SOURCE FILTER COMPONENT
+   ========================================================================= */
+
+.energy-filter {
+  margin-bottom: var(--space-4);
+}
+
+.energy-filter > label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: var(--space-3);
+  color: var(--gray-800);
+}
+
+.energy-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-3);
+  margin-bottom: var(--space-2);
+}
+
+.energy-option {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border: 2px solid var(--gray-200);
+  border-radius: 6px;
+  background: white;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.energy-option:not(.disabled):hover {
+  border-color: var(--primary-blue);
+  background: var(--gray-50);
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.energy-option.selected {
+  background: rgba(30, 58, 138, 0.05);
+  border-color: var(--primary-blue);
+}
+
+.energy-option.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: var(--gray-50);
+}
+
+.energy-option input {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.energy-option.disabled input {
+  cursor: not-allowed;
+}
+
+.energy-option label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  font-weight: normal;
+  cursor: pointer;
+  flex: 1;
+}
+
+.energy-option.disabled label {
+  cursor: not-allowed;
+}
+
+.energy-icon {
+  font-size: var(--text-xl);
+}
+
+.energy-label {
+  font-weight: 500;
+}
+
+.badge-unavailable {
+  display: inline-block;
+  padding: 2px 6px;
+  font-size: var(--text-xs);
+  background: var(--gray-200);
+  color: var(--gray-500);
+  border-radius: 3px;
+  margin-left: var(--space-2);
+}
+
+.badge-auto {
+  display: inline-block;
+  padding: 2px 6px;
+  font-size: var(--text-xs);
+  background: var(--info-blue);
+  color: white;
+  border-radius: 3px;
+  margin-left: var(--space-2);
+}
+
+/* ============================================================================
+   CHART CONTAINER COMPONENT
+   ========================================================================= */
+
+.chart-container {
+  position: relative;
+  background: white;
+  border-radius: 8px;
+  padding: var(--space-4);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-4);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.chart-title {
+  font-size: var(--text-lg);
+  font-weight: 600;
+  color: var(--gray-800);
+  margin: 0;
+}
+
+.chart-actions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.chart-btn {
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-sm);
+  border: 1px solid var(--gray-200);
+  background: white;
+  color: var(--gray-800);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.chart-btn:hover {
+  background: var(--gray-50);
+  border-color: var(--primary-blue);
+}
+
+.chart-canvas {
+  position: relative;
+  width: 100%;
+  min-height: 300px;
+}
+
+.chart-no-data {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  color: var(--gray-500);
+}
+
+.chart-no-data i {
+  font-size: 3rem;
+  margin-bottom: var(--space-3);
+}
+
+/* ============================================================================
+   UTILITY CLASSES
+   ========================================================================= */
+
+.text-muted {
+  color: var(--gray-500);
+  font-size: var(--text-sm);
+}
+
+.form-control {
+  width: 100%;
+  padding: var(--space-3);
+  border: 2px solid var(--gray-200);
+  border-radius: 6px;
+  font-size: var(--text-base);
+  transition: all var(--transition-fast);
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: var(--primary-blue);
+  box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+}
+
+/* Icon placeholders (use Font Awesome or similar in production) */
+.icon-alert-circle::before { content: '⚠️'; }
+.icon-alert-triangle::before { content: '⚠️'; }
+.icon-info::before { content: 'ℹ️'; }
+.icon-check-circle::before { content: '✓'; }
+
+/* ============================================================================
+   RESPONSIVE DESIGN
+   ========================================================================= */
+
+@media (max-width: 768px) {
+  .energy-options {
+    grid-template-columns: 1fr;
+  }
+  
+  .error-message {
+    flex-direction: column;
+  }
+  
+  .chart-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-3);
+  }
+  
+  .chart-actions {
+    width: 100%;
+  }
+  
+  .chart-btn {
+    flex: 1;
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --text-base: 0.875rem;
+    --text-lg: 1rem;
+  }
+  
+  .loading-spinner {
+    padding: var(--space-2);
+  }
+  
+  .error-message {
+    padding: var(--space-3);
+  }
+  
+  .chart-container {
+    padding: var(--space-3);
+  }
+}
+
+/* ============================================================================
+   ACCESSIBILITY
+   ========================================================================= */
+
+/* Focus visible for keyboard navigation */
+*:focus-visible {
+  outline: 2px solid var(--primary-blue);
+  outline-offset: 2px;
+}
+
+/* Skip to content link */
+.skip-to-content {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: var(--primary-blue);
+  color: white;
+  padding: var(--space-2) var(--space-4);
+  z-index: 100;
+}
+
+.skip-to-content:focus {
+  top: 0;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

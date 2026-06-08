@@ -1,0 +1,315 @@
+<!-- Machine Profile - Detailed Analysis -->
+<div class="section machine-profile" style="padding: 1rem 2rem; page-break-inside: avoid;">
+    <!-- Header with Machine Info -->
+    <div style="background: linear-gradient(135deg, #1a365d 0%, #2d3748 100%); border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem; color: white;">
+        <div style="display: grid; grid-template-columns: 1fr; align-items: center;">
+            
+            <!-- Machine Details -->
+            <div>
+                <div style="font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.8; margin-bottom: 0.5rem;">
+                    Machine Profile
+                </div>
+                <h1 style="font-size: 36px; font-weight: 700; margin: 0 0 0.75rem 0;">
+                    {{ machine_name }}
+                </h1>
+                <div style="display: flex; gap: 2rem; font-size: 14px; opacity: 0.9;">
+                    <div>
+                        <span style="opacity: 0.7;">Type:</span> <strong>{{ machine_type }}</strong>
+                    </div>
+                    <div>
+                        <span style="opacity: 0.7;">Location:</span> <strong>{{ location }}</strong>
+                    </div>
+                    <div>
+                        <span style="opacity: 0.7;">ID:</span> <strong>{{ machine_id }}</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Key Performance Metrics -->
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; margin-bottom: 1rem;">
+        <!-- Energy Consumption -->
+        <div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.5rem;">
+            <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: #718096; margin-bottom: 1rem;">
+                Energy Consumption
+            </div>
+            <div style="font-size: 32px; font-weight: 700; color: #1a365d; margin-bottom: 0.5rem;">
+                {{ consumption }}
+            </div>
+            <div style="font-size: 13px; color: {% if consumption_positive %}#48bb78{% else %}#e53e3e{% endif %}; font-weight: 600;">
+                {% if consumption_positive %}↓{% else %}↑{% endif %} {{ consumption_change_pct|abs|round(1) }}%
+            </div>
+        </div>
+        
+        <!-- Efficiency -->
+        <div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.5rem;">
+            <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: #718096; margin-bottom: 1rem;">
+                Efficiency
+            </div>
+            <div style="font-size: 32px; font-weight: 700; color: #1a365d; margin-bottom: 0.5rem;">
+                {{ efficiency_pct|round(1) }}%
+            </div>
+            <div style="font-size: 13px; color: {% if efficiency_positive %}#48bb78{% else %}#e53e3e{% endif %}; font-weight: 600;">
+                {% if efficiency_positive %}↑{% else %}↓{% endif %} {{ efficiency_change_pct|abs|round(1) }}%
+            </div>
+        </div>
+        
+        <!-- Energy Cost -->
+        <div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.5rem;">
+            <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: #718096; margin-bottom: 1rem;">
+                Energy Cost
+            </div>
+            <div style="font-size: 32px; font-weight: 700; color: #e53e3e; margin-bottom: 0.5rem;">
+                {{ energy_cost }}
+            </div>
+            <div style="font-size: 13px; color: #718096;">
+                Operational expense
+            </div>
+        </div>
+        
+        <!-- Carbon Impact -->
+        <div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.5rem;">
+            <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: #718096; margin-bottom: 1rem;">
+                CO₂ Emissions
+            </div>
+            <div style="font-size: 32px; font-weight: 700; color: #1a365d; margin-bottom: 0.5rem;">
+                {{ carbon_emissions }}
+            </div>
+            <div style="font-size: 13px; color: #718096;">
+                kg CO₂
+            </div>
+        </div>
+    </div>
+    
+    <!-- Operating & Performance Metrics -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+        <!-- Operating Metrics -->
+        <div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.5rem;">
+            <h3 style="font-size: 16px; font-weight: 600; color: #1a365d; margin: 0 0 1rem 0;">
+                Operating Metrics
+            </h3>
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
+                <div>
+                    <div style="font-size: 11px; color: #718096; margin-bottom: 0.25rem;">Operating Hours</div>
+                    <div style="font-size: 20px; font-weight: 700; color: #1a365d;">{{ operating_hours }}h</div>
+                </div>
+                <div>
+                    <div style="font-size: 11px; color: #718096; margin-bottom: 0.25rem;">Utilization</div>
+                    <div style="font-size: 20px; font-weight: 700; color: #1a365d;">{{ utilization_pct|round(1) }}%</div>
+                </div>
+                <div>
+                    <div style="font-size: 11px; color: #718096; margin-bottom: 0.25rem;">Avg Power</div>
+                    <div style="font-size: 20px; font-weight: 700; color: #1a365d;">{{ avg_power_kw }} kW</div>
+                </div>
+                <div>
+                    <div style="font-size: 11px; color: #718096; margin-bottom: 0.25rem;">Peak Power</div>
+                    <div style="font-size: 20px; font-weight: 700; color: #e53e3e;">{{ peak_power_kw }} kW</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- SEC & Production -->
+        <div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.5rem;">
+            <h3 style="font-size: 16px; font-weight: 600; color: #1a365d; margin: 0 0 1rem 0;">
+                Specific Energy Consumption
+            </h3>
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
+                <div>
+                    <div style="font-size: 11px; color: #718096; margin-bottom: 0.25rem;">Current SEC</div>
+                    <div style="font-size: 20px; font-weight: 700; color: #1a365d;">{{ sec }} kWh/unit</div>
+                </div>
+                <div>
+                    <div style="font-size: 11px; color: #718096; margin-bottom: 0.25rem;">Baseline SEC</div>
+                    <div style="font-size: 20px; font-weight: 700; color: #718096;">{{ sec_baseline }} kWh/unit</div>
+                </div>
+                <div>
+                    <div style="font-size: 11px; color: #718096; margin-bottom: 0.25rem;">Production</div>
+                    <div style="font-size: 20px; font-weight: 700; color: #1a365d;">{{ production_units }} {{ production_unit_name }}</div>
+                </div>
+                <div>
+                    <div style="font-size: 11px; color: #718096; margin-bottom: 0.25rem;">SEC Status</div>
+                    <div style="
+                        display: inline-block;
+                        padding: 0.25rem 0.75rem;
+                        background: {% if sec_status == 'excellent' %}#48bb78{% elif sec_status == 'good' %}#4299e1{% elif sec_status == 'fair' %}#ed8936{% else %}#e53e3e{% endif %};
+                        color: white;
+                        border-radius: 4px;
+                        font-weight: 600;
+                        font-size: 12px;
+                        text-transform: uppercase;
+                    ">
+                        {{ sec_status }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Baseline Comparison -->
+    <div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem;">
+        <h3 style="font-size: 16px; font-weight: 600; color: #1a365d; margin: 0 0 1rem 0;">
+            Baseline Comparison
+        </h3>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem;">
+            <div style="text-align: center; padding: 1rem; background: #f7fafc; border-radius: 8px;">
+                <div style="font-size: 11px; color: #718096; margin-bottom: 0.5rem;">Baseline</div>
+                <div style="font-size: 24px; font-weight: 700; color: #718096;">{{ baseline }}</div>
+            </div>
+            <div style="text-align: center; padding: 1rem; background: #f7fafc; border-radius: 8px;">
+                <div style="font-size: 11px; color: #718096; margin-bottom: 0.5rem;">Actual</div>
+                <div style="font-size: 24px; font-weight: 700; color: #1a365d;">{{ consumption }}</div>
+            </div>
+            <div style="text-align: center; padding: 1rem; background: {% if vs_baseline_positive %}#f0fff4{% else %}#fff5f5{% endif %}; border-radius: 8px;">
+                <div style="font-size: 11px; color: #718096; margin-bottom: 0.5rem;">Variance</div>
+                <div style="font-size: 24px; font-weight: 700; color: {% if vs_baseline_positive %}#48bb78{% else %}#e53e3e{% endif %};">
+                    {% if vs_baseline_positive %}−{% else %}+{% endif %}{{ vs_baseline_kwh }}
+                </div>
+                <div style="font-size: 11px; color: {% if vs_baseline_positive %}#48bb78{% else %}#e53e3e{% endif %}; margin-top: 0.25rem;">
+                    {{ vs_baseline_pct|round(1) }}% {% if vs_baseline_positive %}below{% else %}above{% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Trend Chart -->
+    {% if has_trend_chart %}
+    <div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem;">
+        <h3 style="font-size: 16px; font-weight: 600; color: #1a365d; margin: 0 0 1rem 0;">
+            Consumption Trend (Last 30 Days)
+        </h3>
+        <div style="width: 100%; max-width: 100%; overflow: hidden;">
+            {{ trend_chart_html|safe }}
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Efficiency Gauge & Daily Pattern -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1rem; page-break-inside: avoid;">
+        {% if has_efficiency_gauge %}
+        <div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.5rem;">
+            <h3 style="font-size: 16px; font-weight: 600; color: #1a365d; margin: 0 0 1rem 0;">
+                Efficiency Status
+            </h3>
+            <div style="width: 100%; max-width: 100%; overflow: hidden;">
+                {{ efficiency_gauge_html|safe }}
+            </div>
+        </div>
+        {% endif %}
+        
+        {% if has_daily_pattern %}
+        <div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.5rem;">
+            <h3 style="font-size: 16px; font-weight: 600; color: #1a365d; margin: 0 0 1rem 0;">
+                Daily Usage Pattern
+            </h3>
+            <div style="width: 100%; max-width: 100%; overflow: hidden;">
+                {{ daily_pattern_chart_html|safe }}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- Anomalies -->
+    {% if has_anomalies %}
+    <div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.5rem; margin-bottom: 2rem;">
+        <h3 style="font-size: 16px; font-weight: 600; color: #1a365d; margin: 0 0 1rem 0; display: flex; align-items: center; gap: 0.5rem;">
+            <span style="
+                display: inline-block;
+                background: {% if anomaly_status == 'success' %}#48bb78{% elif anomaly_status == 'warning' %}#ed8936{% else %}#e53e3e{% endif %};
+                color: white;
+                padding: 0.25rem 0.5rem;
+                border-radius: 4px;
+                font-size: 12px;
+            ">
+                {{ anomaly_count }}
+            </span>
+            Anomalies Detected
+        </h3>
+        
+        <div style="display: grid; gap: 0.75rem;">
+            {% for anomaly in recent_anomalies %}
+            <div style="border-left: 3px solid #e53e3e; padding: 1rem; background: #fff5f5;">
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+                    <div>
+                        <div style="font-weight: 600; color: #2d3748; font-size: 14px;">
+                            {{ anomaly.type }}
+                        </div>
+                        <div style="font-size: 11px; color: #718096; margin-top: 0.25rem;">
+                            {{ anomaly.timestamp }}
+                        </div>
+                    </div>
+                    <div style="
+                        background: #e53e3e;
+                        color: white;
+                        padding: 0.25rem 0.5rem;
+                        border-radius: 4px;
+                        font-size: 11px;
+                        font-weight: 600;
+                    ">
+                        Severity: {{ anomaly.severity }}
+                    </div>
+                </div>
+                <div style="font-size: 13px; color: #4a5568;">
+                    {{ anomaly.description }}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Recommendations -->
+    {% if has_recommendations %}
+    <div style="background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%); border-radius: 8px; padding: 1.5rem; color: white;">
+        <h3 style="font-size: 16px; font-weight: 600; margin: 0 0 1rem 0;">
+            Recommendations ({{ recommendation_count }})
+        </h3>
+        
+        <div style="display: grid; gap: 0.75rem;">
+            {% for rec in recommendations %}
+            <div style="background: rgba(255, 255, 255, 0.15); padding: 1rem; border-radius: 6px;">
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+                    <div style="font-weight: 600; font-size: 14px;">
+                        {{ rec.title }}
+                    </div>
+                    <div style="
+                        background: rgba(255, 255, 255, 0.3);
+                        padding: 0.25rem 0.5rem;
+                        border-radius: 4px;
+                        font-size: 11px;
+                        font-weight: 600;
+                    ">
+                        {{ rec.priority }}
+                    </div>
+                </div>
+                <div style="font-size: 13px; opacity: 0.95;">
+                    {{ rec.description }}
+                </div>
+                {% if rec.potential_savings %}
+                <div style="margin-top: 0.5rem; font-size: 12px; font-weight: 600;">
+                    Potential savings: {{ rec.potential_savings }}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Machine Specs (if available) -->
+    {% if has_specs %}
+    <div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.5rem; margin-top: 2rem;">
+        <h3 style="font-size: 16px; font-weight: 600; color: #1a365d; margin: 0 0 1rem 0;">
+            Machine Specifications
+        </h3>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; font-size: 13px;">
+            {% for key, value in specs.items() %}
+            <div>
+                <div style="color: #718096; margin-bottom: 0.25rem;">{{ key }}</div>
+                <div style="color: #2d3748; font-weight: 600;">{{ value }}</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>

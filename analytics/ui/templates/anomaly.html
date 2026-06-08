@@ -1,0 +1,745 @@
+{% extends "base.html" %}
+
+{% block title %}Anomaly Detection - EnMS Analytics{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Anomaly stat cards with gradient backgrounds */
+    .anomaly-stat-card {
+        background: var(--bg-elevated);
+        border: 1px solid var(--border-default);
+        border-radius: var(--radius-md);
+        padding: var(--space-6);
+        min-height: 160px;
+        position: relative;
+        overflow: hidden;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    
+    .anomaly-stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    }
+    
+    .anomaly-stat-card.critical {
+        background: linear-gradient(135deg, #E74C3C 0%, #C0392B 100%);
+        border: 1px solid rgba(231, 76, 60, 0.3);
+    }
+    
+    .anomaly-stat-card.warning {
+        background: linear-gradient(135deg, #F39C12 0%, #D68910 100%);
+        border: 1px solid rgba(243, 156, 18, 0.3);
+    }
+    
+    .anomaly-stat-card.info {
+        background: linear-gradient(135deg, #3498DB 0%, #2980B9 100%);
+        border: 1px solid rgba(52, 152, 219, 0.3);
+    }
+    
+    .anomaly-stat-card.resolved {
+        background: linear-gradient(135deg, #2ECC71 0%, #27AE60 100%);
+        border: 1px solid rgba(46, 204, 113, 0.3);
+    }
+    
+    .anomaly-stat-icon {
+        width: 48px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: var(--radius-sm);
+        margin-bottom: var(--space-3);
+    }
+    
+    .anomaly-stat-value {
+        font-size: 2.5rem;
+        font-weight: var(--font-bold);
+        color: var(--color-white);
+        line-height: 1;
+        margin-bottom: var(--space-2);
+    }
+    
+    .anomaly-stat-label {
+        font-size: var(--text-sm);
+        font-weight: var(--font-medium);
+        color: rgba(255, 255, 255, 0.9);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    /* Filter section */
+    .filter-section {
+        background: var(--bg-elevated);
+        border: 1px solid var(--border-default);
+        border-radius: var(--radius-md);
+        padding: var(--space-6);
+        margin-bottom: var(--space-6);
+    }
+    
+    .filter-section label {
+        font-size: var(--text-sm);
+        font-weight: var(--font-semibold);
+        color: var(--text-primary);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: var(--space-2);
+        display: block;
+    }
+    
+    /* Filter dropdowns - Better visibility and consistent sizing */
+    .filter-section select.form-select {
+        color: var(--text-primary) !important;
+        font-weight: var(--font-medium) !important;
+        font-size: 15px !important;
+        height: 42px !important;
+        padding: 0.5rem 2.5rem 0.5rem 0.75rem !important;
+        background-color: var(--bg-elevated) !important;
+        border: 1px solid var(--border-default) !important;
+        border-radius: var(--radius-sm) !important;
+        width: 100% !important;
+    }
+    
+    .filter-section select.form-select:focus {
+        border-color: var(--color-primary) !important;
+        box-shadow: 0 0 0 3px rgba(44, 62, 80, 0.1) !important;
+    }
+    
+    .filter-section select.form-select option {
+        color: var(--text-primary) !important;
+        font-size: 15px !important;
+        padding: 8px !important;
+    }
+    
+    .filter-section select.form-select option:first-child {
+        color: var(--text-secondary) !important;
+        font-style: italic;
+    }
+    
+    /* Ensure consistent column spacing */
+    .filter-section .row {
+        margin-left: 0;
+        margin-right: 0;
+    }
+    
+    .filter-section .row > [class*='col-'] {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+    
+    .filter-section .form-label {
+        margin-bottom: var(--space-2);
+        display: block;
+    }
+    
+    /* Anomaly cards */
+    .anomaly-row {
+        border-left: 4px solid;
+        background: var(--bg-elevated);
+        border-radius: var(--radius-sm);
+        padding: var(--space-4);
+        margin-bottom: var(--space-3);
+        border-top: 1px solid var(--border-default);
+        border-right: 1px solid var(--border-default);
+        border-bottom: 1px solid var(--border-default);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    
+    .anomaly-row:hover {
+        transform: translateX(4px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+    
+    .anomaly-row.severity-critical {
+        border-left-color: var(--color-error);
+    }
+    
+    .anomaly-row.severity-warning {
+        border-left-color: var(--color-warning);
+    }
+    
+    .anomaly-row.severity-info {
+        border-left-color: var(--color-info);
+    }
+    
+    .anomaly-meta {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+        margin-bottom: var(--space-3);
+        flex-wrap: wrap;
+    }
+    
+    .anomaly-detail {
+        font-size: var(--text-sm);
+        color: var(--text-secondary);
+        margin-bottom: var(--space-2);
+    }
+    
+    .anomaly-detail strong {
+        color: var(--text-primary);
+        font-weight: var(--font-semibold);
+    }
+    
+    .anomaly-timestamp {
+        font-size: var(--text-xs);
+        color: var(--text-tertiary);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div style="margin-bottom: var(--space-8);">
+    <h1 style="font-size: var(--text-4xl); font-weight: var(--font-bold); color: var(--text-primary); margin-bottom: var(--space-2);">
+        Anomaly Detection
+    </h1>
+    <p style="font-size: var(--text-base); color: var(--text-secondary); margin: 0;">
+        Real-time energy consumption anomaly monitoring and alerting
+    </p>
+</div>
+
+<!-- Stats Cards -->
+<div class="row mb-4">
+    <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-3">
+        <div class="anomaly-stat-card critical">
+            <div class="anomaly-stat-icon">
+                <svg width="24" height="24" fill="white" viewBox="0 0 16 16">
+                    <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+                </svg>
+            </div>
+            <div class="anomaly-stat-value" id="critical-count">0</div>
+            <div class="anomaly-stat-label">Critical</div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-3">
+        <div class="anomaly-stat-card warning">
+            <div class="anomaly-stat-icon">
+                <svg width="24" height="24" fill="white" viewBox="0 0 16 16">
+                    <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+                </svg>
+            </div>
+            <div class="anomaly-stat-value" id="warning-count">0</div>
+            <div class="anomaly-stat-label">Warnings</div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-3">
+        <div class="anomaly-stat-card info">
+            <div class="anomaly-stat-icon">
+                <svg width="24" height="24" fill="white" viewBox="0 0 16 16">
+                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                    <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
+                </svg>
+            </div>
+            <div class="anomaly-stat-value" id="normal-count">0</div>
+            <div class="anomaly-stat-label">Normal</div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-3">
+        <div class="anomaly-stat-card resolved">
+            <div class="anomaly-stat-icon">
+                <svg width="24" height="24" fill="white" viewBox="0 0 16 16">
+                    <path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425a.247.247 0 0 1 .02-.022Z"/>
+                </svg>
+            </div>
+            <div class="anomaly-stat-value" id="resolved-count">0</div>
+            <div class="anomaly-stat-label">Resolved</div>
+        </div>
+    </div>
+</div>
+
+<!-- Filters & Actions -->
+<div class="filter-section">
+    <div class="row mb-4">
+        <div class="col-xl-3 col-lg-3 col-md-6 mb-3">
+            <label for="machine-filter" class="form-label">Machine</label>
+            <select class="form-select" id="machine-filter">
+                <option value="">All Machines</option>
+                <option value="c0000000-0000-0000-0000-000000000001">Compressor-1</option>
+                <option value="h0000000-0000-0000-0000-000000000001">HVAC-1</option>
+                <option value="m0000000-0000-0000-0000-000000000001">Conveyor-1</option>
+            </select>
+        </div>
+        <div class="col-xl-3 col-lg-3 col-md-6 mb-3">
+            <label for="time-filter" class="form-label">Time Range</label>
+            <select class="form-select" id="time-filter">
+                <option value="24">Last 24 Hours</option>
+                <option value="48">Last 48 Hours</option>
+                <option value="168">Last 7 Days</option>
+                <option value="720">Last 30 Days</option>
+            </select>
+        </div>
+        <div class="col-xl-3 col-lg-3 col-md-6 mb-3">
+            <label for="severity-filter" class="form-label">Severity</label>
+            <select class="form-select" id="severity-filter">
+                <option value="">All Severities</option>
+                <option value="critical">Critical</option>
+                <option value="warning">Warning</option>
+                <option value="normal">Normal</option>
+            </select>
+        </div>
+        <div class="col-xl-3 col-lg-3 col-md-6 mb-3">
+            <label for="status-filter" class="form-label">Status</label>
+            <select class="form-select" id="status-filter">
+                <option value="all">All Status</option>
+                <option value="active">Active Only</option>
+                <option value="resolved">Resolved Only</option>
+            </select>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12" style="display: flex; gap: var(--space-3);">
+            <button class="btn btn-primary" id="apply-filters" style="height: 42px; min-width: 140px;">
+                <svg width="16" height="16" fill="currentColor" class="me-2" viewBox="0 0 16 16">
+                    <path d="M6 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5z"/>
+                </svg>
+                Apply Filters
+            </button>
+            <button class="btn btn-accent" id="detect-new-btn" style="height: 42px; min-width: 200px;">
+                <svg width="16" height="16" fill="currentColor" class="me-2" viewBox="0 0 16 16">
+                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                    <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+                </svg>
+                Detect New Anomalies
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Detection Progress -->
+<div id="detection-progress" style="display: none; margin-bottom: var(--space-6);">
+    <div class="industrial-card" style="text-align: center; padding: var(--space-8);">
+        <div class="spinner-lg mb-3"></div>
+        <p style="font-size: var(--text-base); color: var(--text-secondary); margin: 0;">
+            Analyzing energy consumption patterns...
+        </p>
+    </div>
+</div>
+
+<!-- Anomalies List -->
+<div class="industrial-card">
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-5) var(--space-6); border-bottom: 1px solid var(--border-default);">
+        <h2 style="font-size: var(--text-xl); font-weight: var(--font-semibold); color: var(--text-primary); margin: 0;">
+            Detected Anomalies
+        </h2>
+        <div style="display: flex; align-items: center; gap: var(--space-4);">
+            <div style="display: flex; align-items: center; gap: var(--space-2);">
+                <label for="items-per-page" style="font-size: var(--text-sm); color: var(--text-secondary); margin: 0;">
+                    Show:
+                </label>
+                <select id="items-per-page" class="form-select form-select-sm" style="width: auto; height: 32px;">
+                    <option value="10">10</option>
+                    <option value="25" selected>25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                </select>
+            </div>
+            <span class="badge badge-info" id="total-count">0</span>
+        </div>
+    </div>
+    <div style="padding: var(--space-6);">
+        <div id="anomalies-container">
+            <div class="loading-state">
+                <div class="spinner-lg"></div>
+            </div>
+        </div>
+        <!-- Pagination Controls -->
+        <nav aria-label="Anomalies pagination" id="pagination-nav" style="display: none; margin-top: var(--space-6);">
+            <ul class="pagination justify-content-center mb-0" id="pagination-controls">
+            </ul>
+        </nav>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Toast Notification System
+    function showToast(message, type = 'info', duration = 5000) {
+        const container = document.querySelector('.toast-container');
+        if (!container) {
+            console.error('Toast container not found');
+            return;
+        }
+        const toastEl = document.createElement('div');
+        toastEl.className = `toast align-items-center text-bg-${type} border-0`;
+        toastEl.setAttribute('role', 'alert');
+        toastEl.setAttribute('aria-live', 'assertive');
+        toastEl.setAttribute('aria-atomic', 'true');
+        
+        toastEl.innerHTML = `
+            <div class="d-flex">
+                <div class="toast-body">
+                    ${message}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        `;
+        
+        container.appendChild(toastEl);
+        const toast = new bootstrap.Toast(toastEl, { delay: duration });
+        toast.show();
+        
+        // Remove from DOM after hiding
+        toastEl.addEventListener('hidden.bs.toast', () => {
+            toastEl.remove();
+        });
+    }
+
+    let currentAnomalies = [];
+    let currentPage = 1;
+    let itemsPerPage = 25;
+    
+    // Load anomalies on page load
+    document.addEventListener('DOMContentLoaded', () => {
+        loadAnomalies();
+        
+        // Items per page change handler
+        document.getElementById('items-per-page').addEventListener('change', (e) => {
+            itemsPerPage = parseInt(e.target.value);
+            currentPage = 1;
+            displayAnomalies(currentAnomalies);
+        });
+    });
+    
+    // Apply filters
+    document.getElementById('apply-filters').addEventListener('click', () => {
+        currentPage = 1;
+        loadAnomalies();
+    });
+    
+    // Detect new anomalies
+    document.getElementById('detect-new-btn').addEventListener('click', async () => {
+        const machineId = document.getElementById('machine-filter').value;
+        
+        if (!machineId) {
+            showToast('Please select a specific machine to detect anomalies', 'warning');
+            return;
+        }
+        
+        document.getElementById('detection-progress').style.display = 'block';
+        
+        try {
+            const now = new Date();
+            const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+            
+            const response = await axios.post(`${API_BASE}/anomaly/detect`, {
+                machine_id: machineId,
+                start_date: yesterday.toISOString(),
+                end_date: now.toISOString()
+            });
+            
+            showToast(`Detection complete! Found ${response.data.anomalies_detected} anomalies.`, 'success');
+            loadAnomalies(); // Reload the list
+            
+        } catch (error) {
+            showToast('Detection failed: ' + (error.response?.data?.message || error.message), 'danger');
+        } finally {
+            document.getElementById('detection-progress').style.display = 'none';
+        }
+    });
+    
+    async function loadAnomalies() {
+        const container = document.getElementById('anomalies-container');
+        container.innerHTML = '<div class="loading-state"><div class="spinner-lg"></div></div>';
+        
+        try {
+            const hours = parseInt(document.getElementById('time-filter').value);
+            const machineId = document.getElementById('machine-filter').value;
+            const severity = document.getElementById('severity-filter').value;
+            const status = document.getElementById('status-filter').value;
+            
+            // Calculate time window based on selected hours
+            const endTime = new Date();
+            const startTime = new Date(endTime.getTime() - (hours * 60 * 60 * 1000));
+            
+            const params = { 
+                limit: 200,
+                start_time: startTime.toISOString(),
+                end_time: endTime.toISOString()
+            };
+            if (machineId) params.machine_id = machineId;
+            if (severity) params.severity = severity;
+            
+            let response;
+            if (status === 'active') {
+                // Active anomalies don't need time filter (they're unresolved)
+                const activeParams = { limit: 200 };
+                if (machineId) activeParams.machine_id = machineId;
+                if (severity) activeParams.severity = severity;
+                response = await axios.get(`${API_BASE}/anomaly/active`, { params: activeParams });
+            } else {
+                response = await axios.get(`${API_BASE}/anomaly/recent`, { params });
+            }
+            
+            // Extract anomalies array from response
+            let anomalies = response.data.anomalies || response.data;
+            if (!Array.isArray(anomalies)) {
+                anomalies = [];
+            }
+            
+            // Apply filters
+            if (severity) {
+                anomalies = anomalies.filter(a => a.severity === severity);
+            }
+            if (status === 'resolved') {
+                anomalies = anomalies.filter(a => a.is_resolved);
+            }
+            
+            currentAnomalies = anomalies;
+            displayAnomalies(anomalies);
+            updateStats(anomalies);
+            
+        } catch (error) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <svg width="64" height="64" fill="currentColor" viewBox="0 0 16 16" style="color: var(--text-tertiary); margin-bottom: var(--space-4);">
+                        <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+                    </svg>
+                    <p style="font-size: var(--text-base); color: var(--text-secondary); margin: 0;">
+                        Failed to load anomalies. Please try again.
+                    </p>
+                </div>
+            `;
+            console.error('Error loading anomalies:', error);
+        }
+    }
+    
+    function displayAnomalies(data) {
+        const container = document.getElementById('anomalies-container');
+        const paginationNav = document.getElementById('pagination-nav');
+        
+        // Ensure we have an array
+        const anomalies = Array.isArray(data) ? data : (data?.anomalies || []);
+        
+        if (!anomalies || anomalies.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <svg width="64" height="64" fill="currentColor" viewBox="0 0 16 16" style="color: var(--text-tertiary); margin-bottom: var(--space-4);">
+                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                        <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
+                    </svg>
+                    <p style="font-size: var(--text-base); color: var(--text-secondary); margin: 0;">
+                        No anomalies found with the selected filters.
+                    </p>
+                </div>
+            `;
+            paginationNav.style.display = 'none';
+            return;
+        }
+        
+        // Calculate pagination
+        const totalItems = anomalies.length;
+        const totalPages = Math.ceil(totalItems / itemsPerPage);
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+        const currentPageAnomalies = anomalies.slice(startIndex, endIndex);
+        
+        // Update total count badge
+        document.getElementById('total-count').textContent = totalItems;
+        
+        let html = '';
+        
+        currentPageAnomalies.forEach(anomaly => {
+            const severityBadge = {
+                'critical': '<span class="badge badge-danger badge-with-dot">Critical</span>',
+                'warning': '<span class="badge badge-warning badge-with-dot">Warning</span>',
+                'normal': '<span class="badge badge-info">Normal</span>'
+            }[anomaly.severity] || '<span class="badge badge-neutral">Unknown</span>';
+            
+            const statusBadge = anomaly.is_resolved ? 
+                '<span class="badge badge-success badge-with-dot">Resolved</span>' : 
+                '<span class="badge badge-danger">Active</span>';
+            
+            html += `
+                <div class="anomaly-row severity-${anomaly.severity}">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="anomaly-meta">
+                                ${severityBadge}
+                                ${statusBadge}
+                                <span class="anomaly-timestamp ms-auto">${formatDate(anomaly.detected_at)}</span>
+                            </div>
+                            <h6 style="font-size: var(--text-base); font-weight: var(--font-semibold); color: var(--text-primary); margin-bottom: var(--space-2);">
+                                ${anomaly.anomaly_type || 'Energy Consumption Anomaly'}
+                            </h6>
+                            <div class="anomaly-detail">
+                                <strong>Machine:</strong> ${anomaly.machine_id}
+                            </div>
+                            ${anomaly.metric_name ? `
+                                <div class="anomaly-detail">
+                                    <strong>Metric:</strong> ${anomaly.metric_name}
+                                </div>
+                            ` : ''}
+                            ${anomaly.deviation_percent ? `
+                                <div class="anomaly-detail">
+                                    <strong>Deviation:</strong> ${formatNumber(anomaly.deviation_percent)}% from expected
+                                </div>
+                            ` : ''}
+                            ${anomaly.confidence_score ? `
+                                <div class="anomaly-detail">
+                                    <strong>Confidence:</strong> ${formatNumber(anomaly.confidence_score * 100)}%
+                                </div>
+                            ` : ''}
+                        </div>
+                        <div class="col-md-4" style="text-align: right;">
+                            ${!anomaly.is_resolved ? `
+                                <button class="btn btn-sm btn-success" onclick="resolveAnomaly('${anomaly.id}')" style="min-width: 160px;">
+                                    <svg width="14" height="14" fill="currentColor" class="me-1" viewBox="0 0 16 16">
+                                        <path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425a.247.247 0 0 1 .02-.022Z"/>
+                                    </svg>
+                                    Mark as Resolved
+                                </button>
+                            ` : ''}
+                            ${anomaly.resolution_notes ? `
+                                <div style="margin-top: var(--space-3); padding: var(--space-3); background: var(--bg-secondary); border-radius: var(--radius-sm); text-align: left;">
+                                    <div style="font-size: var(--text-xs); color: var(--text-tertiary); margin-bottom: var(--space-1); text-transform: uppercase; letter-spacing: 0.5px;">
+                                        Resolution Notes
+                                    </div>
+                                    <p style="font-size: var(--text-sm); color: var(--text-secondary); margin: 0;">
+                                        ${anomaly.resolution_notes}
+                                    </p>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        container.innerHTML = html;
+        
+        // Render pagination controls
+        renderPagination(totalPages, totalItems);
+    }
+    
+    function renderPagination(totalPages, totalItems) {
+        const paginationNav = document.getElementById('pagination-nav');
+        const paginationControls = document.getElementById('pagination-controls');
+        
+        if (totalPages <= 1) {
+            paginationNav.style.display = 'none';
+            return;
+        }
+        
+        paginationNav.style.display = 'block';
+        
+        let html = '';
+        
+        // Previous button
+        html += `
+            <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+                <a class="page-link" href="#" onclick="changePage(${currentPage - 1}); return false;">
+                    <i class="bi bi-chevron-left"></i> Previous
+                </a>
+            </li>
+        `;
+        
+        // Page numbers with smart pagination
+        const maxVisiblePages = 5;
+        let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+        let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+        
+        // Adjust startPage if we're near the end
+        if (endPage - startPage < maxVisiblePages - 1) {
+            startPage = Math.max(1, endPage - maxVisiblePages + 1);
+        }
+        
+        // First page + ellipsis
+        if (startPage > 1) {
+            html += `
+                <li class="page-item">
+                    <a class="page-link" href="#" onclick="changePage(1); return false;">1</a>
+                </li>
+            `;
+            if (startPage > 2) {
+                html += '<li class="page-item disabled"><span class="page-link">...</span></li>';
+            }
+        }
+        
+        // Page numbers
+        for (let i = startPage; i <= endPage; i++) {
+            html += `
+                <li class="page-item ${i === currentPage ? 'active' : ''}">
+                    <a class="page-link" href="#" onclick="changePage(${i}); return false;">${i}</a>
+                </li>
+            `;
+        }
+        
+        // Ellipsis + last page
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) {
+                html += '<li class="page-item disabled"><span class="page-link">...</span></li>';
+            }
+            html += `
+                <li class="page-item">
+                    <a class="page-link" href="#" onclick="changePage(${totalPages}); return false;">${totalPages}</a>
+                </li>
+            `;
+        }
+        
+        // Next button
+        html += `
+            <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+                <a class="page-link" href="#" onclick="changePage(${currentPage + 1}); return false;">
+                    Next <i class="bi bi-chevron-right"></i>
+                </a>
+            </li>
+        `;
+        
+        // Info text
+        const startItem = (currentPage - 1) * itemsPerPage + 1;
+        const endItem = Math.min(currentPage * itemsPerPage, totalItems);
+        html += `
+            <li class="page-item disabled ms-3">
+                <span class="page-link bg-transparent border-0">
+                    Showing ${startItem}-${endItem} of ${totalItems}
+                </span>
+            </li>
+        `;
+        
+        paginationControls.innerHTML = html;
+    }
+    
+    function changePage(page) {
+        const totalPages = Math.ceil(currentAnomalies.length / itemsPerPage);
+        if (page < 1 || page > totalPages) return;
+        
+        currentPage = page;
+        displayAnomalies(currentAnomalies);
+        
+        // Scroll to top of anomalies list
+        document.getElementById('anomalies-container').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+    
+    function updateStats(anomalies) {
+        const critical = anomalies.filter(a => a.severity === 'critical').length;
+        const warning = anomalies.filter(a => a.severity === 'warning').length;
+        const normal = anomalies.filter(a => a.severity === 'normal').length;
+        const resolved = anomalies.filter(a => a.is_resolved).length;
+        
+        document.getElementById('critical-count').textContent = critical;
+        document.getElementById('warning-count').textContent = warning;
+        document.getElementById('normal-count').textContent = normal;
+        document.getElementById('resolved-count').textContent = resolved;
+        document.getElementById('total-count').textContent = anomalies.length;
+    }
+    
+    async function resolveAnomaly(anomalyId) {
+        const notes = prompt('Enter resolution notes (optional):');
+        if (notes === null) return; // User cancelled
+        
+        try {
+            await axios.put(`${API_BASE}/anomaly/${anomalyId}/resolve`, {
+                resolution_notes: notes || 'Resolved by user'
+            });
+            
+            showToast('Anomaly marked as resolved', 'success');
+            loadAnomalies(); // Reload the list
+            
+        } catch (error) {
+            showToast('Failed to resolve anomaly: ' + (error.response?.data?.message || error.message), 'danger');
+        }
+    }
+</script>
+{% endblock %}

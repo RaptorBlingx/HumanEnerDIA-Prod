@@ -1,0 +1,16 @@
+{
+    "name": "enms-nodered",
+    "description": "EnMS Node-RED Data Pipeline",
+    "version": "1.0.0",
+    "dependencies": {
+        "node-red-contrib-postgresql": "0.15.4",
+        "node-red-dashboard": "3.6.0",
+        "node-red-node-email": "1.18.4"
+    },
+    "node-red": {
+        "settings": {
+            "flowFile": "flows.json",
+            "credentialsFile": "flows_cred.json"
+        }
+    }
+}

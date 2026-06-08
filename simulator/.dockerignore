@@ -1,0 +1,11 @@
+.git
+.env
+*.log
+*.pyc
+__pycache__/
+.pytest_cache/
+tests/
+test_*.py
+*_test.py
+*.bak
+*.old

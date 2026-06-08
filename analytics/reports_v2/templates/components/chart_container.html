@@ -1,0 +1,45 @@
+<!-- Chart Container Component Template -->
+<div class="chart-container no-break" style="margin: 1.5rem 0; padding: 1rem; background: white; border: 1px solid #e2e8f0; border-radius: 8px;">
+    {% if title %}
+    <div class="chart-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #00A8E8;">
+        <h3 class="chart-title" style="font-size: 1rem; font-weight: 600; color: #1a365d; margin: 0;">
+            {{ title }}
+        </h3>
+        
+        {% if download_icon %}
+        <span class="chart-download" style="font-size: 0.875rem; color: #718096;">
+            📥
+        </span>
+        {% endif %}
+    </div>
+    {% endif %}
+    
+    {% if subtitle %}
+    <p class="chart-subtitle" style="font-size: 0.875rem; color: #718096; margin: 0 0 1rem 0;">
+        {{ subtitle }}
+    </p>
+    {% endif %}
+    
+    <div class="chart-content" style="width: 100%; min-height: {{ height | default('300px') }};">
+        {% if chart_html %}
+            {{ chart_html | safe }}
+        {% else %}
+            <!-- Placeholder for chart -->
+            <div style="width: 100%; height: {{ height | default('300px') }}; background: #f7fafc; display: flex; align-items: center; justify-content: center; border-radius: 4px;">
+                <p style="color: #718096;">Chart will be rendered here</p>
+            </div>
+        {% endif %}
+    </div>
+    
+    {% if caption %}
+    <p class="chart-caption" style="font-size: 0.75rem; color: #718096; margin-top: 0.75rem; font-style: italic;">
+        {{ caption }}
+    </p>
+    {% endif %}
+    
+    {% if source %}
+    <p class="chart-source" style="font-size: 0.7rem; color: #a0aec0; margin-top: 0.5rem; margin-bottom: 0;">
+        <strong>Source:</strong> {{ source }}
+    </p>
+    {% endif %}
+</div>

@@ -1,0 +1,27 @@
+# EnMS Project - Grafana Datasource Provisioning
+# This file automatically configures the TimescaleDB datasource when Grafana starts
+# No manual configuration needed!
+
+apiVersion: 1
+
+# List of datasources to insert/update depending on what's available in the database
+datasources:
+  # TimescaleDB (PostgreSQL) - Main time-series database
+  - name: TimescaleDB
+    type: postgres
+    access: proxy
+    url: postgres:5432
+    database: enms
+    user: ${POSTGRES_USER}
+    secureJsonData:
+      password: ${POSTGRES_PASSWORD}
+    jsonData:
+      sslmode: 'disable'
+      postgresVersion: 1600  # PostgreSQL 16
+      timescaledb: true
+      maxOpenConns: 100
+      maxIdleConns: 100
+      connMaxLifetime: 14400
+    isDefault: true
+    editable: true
+    version: 1

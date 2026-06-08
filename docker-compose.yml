@@ -1,0 +1,409 @@
+services:
+  # ============================================================================
+  # API GATEWAY - Single entry point for all services
+  # ============================================================================
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: ${CONTAINER_PREFIX:-enms}-nginx
+    ports:
+      - "${NGINX_HTTP_PORT:-8080}:80"
+      - "${NGINX_HTTPS_PORT:-8443}:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - ./portal/public:/usr/share/nginx/html/portal:ro
+    depends_on:
+      - grafana
+      - nodered
+      - analytics
+      - simulator
+      - chatbot
+      - auth-service
+    networks:
+      - enms-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ============================================================================
+  # DATABASE - PostgreSQL with TimescaleDB extension
+  # ============================================================================
+  postgres:
+    image: timescale/timescaledb:latest-pg16
+    container_name: ${CONTAINER_PREFIX:-enms}-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      TIMESCALEDB_TELEMETRY: off
+      # Optimize for 4GB RAM server
+      POSTGRES_SHARED_BUFFERS: 1GB
+      POSTGRES_EFFECTIVE_CACHE_SIZE: 3GB
+      POSTGRES_MAX_LOCKS_PER_TRANSACTION: 256
+      POSTGRES_WORK_MEM: 16MB
+      POSTGRES_MAINTENANCE_WORK_MEM: 256MB
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./database/init:/docker-entrypoint-initdb.d:ro
+      - ./database/postgresql.conf:/etc/postgresql/postgresql.conf:ro
+    ports:
+      - "${POSTGRES_EXTERNAL_PORT:-5433}:5432"
+    networks:
+      - enms-network
+    restart: unless-stopped
+    shm_size: 1g  # Shared memory for sorts/joins
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ============================================================================
+  # MQTT BROKER - Eclipse Mosquitto (credentials supplied through .env)
+  # ============================================================================
+  mqtt:
+    build:
+      context: ./mqtt
+      dockerfile: Dockerfile
+      args:
+        MQTT_USERNAME: ${MQTT_USERNAME}
+        MQTT_PASSWORD: ${MQTT_PASSWORD}
+    container_name: ${CONTAINER_PREFIX:-enms}-mqtt
+    environment:
+      MQTT_USERNAME: ${MQTT_USERNAME}
+      MQTT_PASSWORD: ${MQTT_PASSWORD}
+    ports:
+      - "${MQTT_EXTERNAL_PORT:-1883}:1883"
+      - "${MQTT_WEBSOCKET_PORT:-9001}:9001"
+    volumes:
+      - mqtt-data:/mosquitto/data
+      - mqtt-logs:/mosquitto/log
+    networks:
+      - enms-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z localhost 1883"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ============================================================================
+  # REDIS - Caching and Pub/Sub
+  # ============================================================================
+  redis:
+    image: redis:7-alpine
+    container_name: ${CONTAINER_PREFIX:-enms}-redis
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    ports:
+      - "${REDIS_EXTERNAL_PORT:-6380}:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - enms-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a \"$${REDIS_PASSWORD}\" ping | grep -q PONG"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ============================================================================
+  # FACTORY SIMULATOR - Generate realistic factory data
+  # ============================================================================
+  simulator:
+    build:
+      context: ./simulator
+      dockerfile: Dockerfile
+    container_name: ${CONTAINER_PREFIX:-enms}-simulator
+    environment:
+      MQTT_HOST: ${MQTT_HOST:-mqtt}
+      MQTT_PORT: 1883
+      MQTT_USERNAME: ${MQTT_USERNAME}
+      MQTT_PASSWORD: ${MQTT_PASSWORD}
+      POSTGRES_HOST: postgres
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      SIMULATOR_PORT: 8003
+      SIMULATOR_AUTO_START: ${SIMULATOR_AUTO_START:-true}
+      SIMULATOR_FACTORIES: ${SIMULATOR_FACTORIES:-1}
+      SIMULATOR_MACHINES_PER_FACTORY: ${SIMULATOR_MACHINES_PER_FACTORY:-5}
+      SIMULATOR_ENABLE_ANOMALIES: ${SIMULATOR_ENABLE_ANOMALIES:-true}
+      LOG_LEVEL: INFO
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mqtt:
+        condition: service_healthy
+    networks:
+      - enms-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8003/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ============================================================================
+  # NODE-RED - Data ingestion and ETL pipeline
+  # ============================================================================
+  nodered:
+      build:
+        context: ./nodered
+        dockerfile: Dockerfile
+      container_name: ${CONTAINER_PREFIX:-enms}-nodered
+      restart: unless-stopped
+      ports:
+        - "${NODERED_PORT:-1881}:1880"
+      volumes:
+        - ./nodered/data:/data
+        - ./nodered/settings.js:/data/settings.js:ro
+      environment:
+        - TZ=Europe/Istanbul
+        - NODE_RED_ENABLE_PROJECTS=true
+        - NODE_RED_CREDENTIAL_SECRET=${NODE_RED_CREDENTIAL_SECRET:?Set NODE_RED_CREDENTIAL_SECRET in .env}
+        - NODE_RED_USERNAME=${NODE_RED_USERNAME:-admin}
+        - NODE_RED_PASSWORD_HASH=${NODE_RED_PASSWORD_HASH:?Set NODE_RED_PASSWORD_HASH in .env}
+        - MQTT_HOST=${MQTT_HOST:-mqtt}
+        - MQTT_PORT=1883
+        - MQTT_USERNAME=${MQTT_USERNAME}
+        - MQTT_PASSWORD=${MQTT_PASSWORD}
+        - POSTGRES_HOST=postgres
+        - POSTGRES_PORT=5432
+        - POSTGRES_DB=${POSTGRES_DB}
+        - POSTGRES_USER=${POSTGRES_USER}
+        - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      networks:
+        - enms-network
+      depends_on:
+        postgres:
+          condition: service_healthy
+        mqtt:
+          condition: service_healthy
+      healthcheck:
+        test: ["CMD", "curl", "-f", "http://localhost:1880/"]
+        interval: 30s
+        timeout: 10s
+        retries: 3
+        start_period: 30s
+  # ============================================================================
+  # GRAFANA - Visualization and dashboards
+  # ============================================================================
+  grafana:
+    image: grafana/grafana:10.2.0
+    container_name: ${CONTAINER_PREFIX:-enms}-grafana
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      GF_INSTALL_PLUGINS: grafana-clock-panel,grafana-simple-json-datasource
+      GF_SERVER_ROOT_URL: ${GRAFANA_ROOT_URL:-http://localhost:8080/grafana}
+      GF_SERVER_SERVE_FROM_SUB_PATH: "true"
+    ports:
+      - "${GRAFANA_PORT:-3001}:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - ./grafana/grafana.ini:/etc/grafana/grafana.ini:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - enms-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ============================================================================
+  # ANALYTICS SERVICE - ML models and statistical analysis
+  # ============================================================================
+  analytics:
+    build:
+      context: ./analytics
+      dockerfile: Dockerfile
+    container_name: ${CONTAINER_PREFIX:-enms}-analytics
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_USER: ${POSTGRES_USER}
+      DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
+      DATABASE_NAME: ${POSTGRES_DB}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      API_PORT: 8001
+      LOG_LEVEL: INFO
+      JWT_SECRET: ${JWT_SECRET}
+      OVOS_BRIDGE_HOST: ${OVOS_BRIDGE_HOST:-ovos-enms}
+      OVOS_BRIDGE_PORT: ${OVOS_BRIDGE_PORT:-5000}
+      OVOS_BRIDGE_TIMEOUT: ${OVOS_BRIDGE_TIMEOUT:-20}
+    ports:
+      - "${ANALYTICS_PORT:-8001}:8001"
+    volumes:
+      - ./analytics/models/saved:/app/models/saved  # Persistent ML model storage
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - enms-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ============================================================================
+  # AUTH SERVICE - User authentication and authorization
+  # ============================================================================
+  auth-service:
+    build:
+      context: ./auth-service
+      dockerfile: Dockerfile
+    container_name: ${CONTAINER_PREFIX:-enms}-auth-service
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION_HOURS: ${JWT_EXPIRATION_HOURS:-168}
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT}
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASSWORD: ${SMTP_PASSWORD}
+      SMTP_FROM_EMAIL: ${SMTP_FROM_EMAIL}
+      SMTP_FROM_NAME: ${SMTP_FROM_NAME}
+      FRONTEND_URL: ${FRONTEND_URL}
+      ADMIN_EMAILS: ${ADMIN_EMAILS}
+      SIGNUP_ALERT_RECIPIENTS: ${SIGNUP_ALERT_RECIPIENTS}
+      AUTH_SERVICE_PORT: 5500
+      DEBUG_MODE: ${DEBUG_MODE:-false}
+    ports:
+      - "${AUTH_SERVICE_EXTERNAL_PORT:-5500}:5500"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - enms-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5500/api/auth/health', timeout=5).read()"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ============================================================================
+  # RASA ACTION SERVER - Custom actions for RAG/retrieval
+  # ============================================================================
+  rasa-actions:
+    build:
+      context: ./chatbot/rasa
+      dockerfile: Dockerfile.actions
+    container_name: ${CONTAINER_PREFIX:-enms}-rasa-actions
+    ports:
+      - "${RASA_ACTIONS_PORT:-5055}:5055"
+    networks:
+      - enms-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:5055/health')\""]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # ============================================================================
+  # RASA - NLU/NLP Engine for chatbot
+  # ============================================================================
+  rasa:
+    build:
+      context: ./chatbot/rasa
+      dockerfile: Dockerfile
+    container_name: ${CONTAINER_PREFIX:-enms}-rasa
+    ports:
+      - "${RASA_PORT:-5005}:5005"
+    depends_on:
+      rasa-actions:
+        condition: service_healthy
+    networks:
+      - enms-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5005/"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 120s
+
+  # ============================================================================
+  # CHATBOT - Express backend proxying to Rasa
+  # ============================================================================
+  chatbot:
+    build:
+      context: ./chatbot
+      dockerfile: Dockerfile
+    container_name: ${CONTAINER_PREFIX:-enms}-chatbot
+    environment:
+      NODE_ENV: production
+      BACKEND_PORT: 5006
+      RASA_HOST: rasa
+      RASA_PORT: 5005
+    ports:
+      - "${CHATBOT_PORT:-5006}:5006"
+    depends_on:
+      rasa:
+        condition: service_healthy
+    networks:
+      - enms-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:5006/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+# ============================================================================
+# NETWORKS
+# ============================================================================
+networks:
+  enms-network:
+    driver: bridge
+    name: ${ENMS_NETWORK_NAME:-enms-network}
+
+# ============================================================================
+# VOLUMES - Persistent data storage
+# ============================================================================
+volumes:
+  postgres-data:
+    name: ${VOLUME_PREFIX:-enms}-postgres-data
+  mqtt-data:
+    name: ${VOLUME_PREFIX:-enms}-mqtt-data
+  mqtt-logs:
+    name: ${VOLUME_PREFIX:-enms}-mqtt-logs
+  redis-data:
+    name: ${VOLUME_PREFIX:-enms}-redis-data
+  nodered-data:
+    name: ${VOLUME_PREFIX:-enms}-nodered-data
+  grafana-data:
+    name: ${VOLUME_PREFIX:-enms}-grafana-data

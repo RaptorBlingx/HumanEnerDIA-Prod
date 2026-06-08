@@ -1,0 +1,917 @@
+/* ============================================================================
+   EnMS Design System v1.0
+   Energy Management System - Unified Portal Styling
+   Created: October 16, 2025
+   ============================================================================ */
+
+/* ============================================================================
+   CSS VARIABLES - Color Palette & Design Tokens
+   ============================================================================ */
+:root {
+    /* Primary Brand Colors */
+    --color-primary: #667eea;
+    --color-primary-dark: #5568d3;
+    --color-primary-light: #7c8ff0;
+    --color-secondary: #764ba2;
+    --color-secondary-dark: #63408a;
+    --color-secondary-light: #8c5bb8;
+    
+    /* Status Colors */
+    --color-success: #10b981;
+    --color-success-light: #34d399;
+    --color-success-dark: #059669;
+    --color-warning: #f59e0b;
+    --color-warning-light: #fbbf24;
+    --color-warning-dark: #d97706;
+    --color-error: #ef4444;
+    --color-error-light: #f87171;
+    --color-error-dark: #dc2626;
+    --color-info: #3b82f6;
+    --color-info-light: #60a5fa;
+    --color-info-dark: #2563eb;
+    
+    /* Neutral Colors */
+    --color-white: #ffffff;
+    --color-gray-50: #f9fafb;
+    --color-gray-100: #f3f4f6;
+    --color-gray-200: #e5e7eb;
+    --color-gray-300: #d1d5db;
+    --color-gray-400: #9ca3af;
+    --color-gray-500: #6b7280;
+    --color-gray-600: #4b5563;
+    --color-gray-700: #374151;
+    --color-gray-800: #1f2937;
+    --color-gray-900: #111827;
+    --color-black: #000000;
+    
+    /* Background Gradients */
+    --gradient-primary: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+    --gradient-success: linear-gradient(135deg, var(--color-success) 0%, var(--color-success-dark) 100%);
+    --gradient-warning: linear-gradient(135deg, var(--color-warning) 0%, var(--color-warning-dark) 100%);
+    --gradient-error: linear-gradient(135deg, var(--color-error) 0%, var(--color-error-dark) 100%);
+    
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    
+    /* Typography */
+    --font-family-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    --font-family-mono: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+    
+    /* Font Sizes */
+    --text-xs: 0.75rem;      /* 12px */
+    --text-sm: 0.875rem;     /* 14px */
+    --text-base: 1rem;       /* 16px */
+    --text-lg: 1.125rem;     /* 18px */
+    --text-xl: 1.25rem;      /* 20px */
+    --text-2xl: 1.5rem;      /* 24px */
+    --text-3xl: 1.875rem;    /* 30px */
+    --text-4xl: 2.25rem;     /* 36px */
+    --text-5xl: 3rem;        /* 48px */
+    --text-6xl: 3.75rem;     /* 60px */
+    
+    /* Font Weights */
+    --font-light: 300;
+    --font-normal: 400;
+    --font-medium: 500;
+    --font-semibold: 600;
+    --font-bold: 700;
+    --font-extrabold: 800;
+    
+    /* Spacing Scale */
+    --space-1: 0.25rem;   /* 4px */
+    --space-2: 0.5rem;    /* 8px */
+    --space-3: 0.75rem;   /* 12px */
+    --space-4: 1rem;      /* 16px */
+    --space-5: 1.25rem;   /* 20px */
+    --space-6: 1.5rem;    /* 24px */
+    --space-8: 2rem;      /* 32px */
+    --space-10: 2.5rem;   /* 40px */
+    --space-12: 3rem;     /* 48px */
+    --space-16: 4rem;     /* 64px */
+    --space-20: 5rem;     /* 80px */
+    
+    /* Border Radius */
+    --radius-sm: 0.25rem;    /* 4px */
+    --radius-md: 0.5rem;     /* 8px */
+    --radius-lg: 0.75rem;    /* 12px */
+    --radius-xl: 1rem;       /* 16px */
+    --radius-2xl: 1.5rem;    /* 24px */
+    --radius-full: 9999px;
+    
+    /* Transitions */
+    --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
+    
+    /* Z-Index Scale */
+    --z-dropdown: 1000;
+    --z-sticky: 1020;
+    --z-fixed: 1030;
+    --z-modal-backdrop: 1040;
+    --z-modal: 1050;
+    --z-popover: 1060;
+    --z-tooltip: 1070;
+}
+
+/* ============================================================================
+   GLOBAL RESET & BASE STYLES
+   ============================================================================ */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+    font-family: var(--font-family-sans);
+    font-size: var(--text-base);
+    font-weight: var(--font-normal);
+    line-height: 1.5;
+    color: var(--color-gray-900);
+    background: var(--gradient-primary);
+    min-height: 100vh;
+}
+
+/* ============================================================================
+   LAYOUT COMPONENTS
+   ============================================================================ */
+
+/* Container */
+.enms-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: var(--space-4);
+    width: 100%;
+}
+
+.enms-container-fluid {
+    width: 100%;
+    padding: var(--space-4);
+}
+
+.enms-container-narrow {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: var(--space-4);
+}
+
+/* Grid System */
+.enms-grid {
+    display: grid;
+    gap: var(--space-4);
+}
+
+.enms-grid-2 { grid-template-columns: repeat(2, 1fr); }
+.enms-grid-3 { grid-template-columns: repeat(3, 1fr); }
+.enms-grid-4 { grid-template-columns: repeat(4, 1fr); }
+
+@media (max-width: 768px) {
+    .enms-grid-2,
+    .enms-grid-3,
+    .enms-grid-4 {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Flexbox Utilities */
+.enms-flex {
+    display: flex;
+}
+
+.enms-flex-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.enms-flex-between {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.enms-flex-col {
+    display: flex;
+    flex-direction: column;
+}
+
+.enms-flex-wrap {
+    flex-wrap: wrap;
+}
+
+.enms-gap-2 { gap: var(--space-2); }
+.enms-gap-4 { gap: var(--space-4); }
+.enms-gap-6 { gap: var(--space-6); }
+
+/* ============================================================================
+   NAVIGATION COMPONENTS
+   ============================================================================ */
+
+/* Main Navigation Bar */
+.enms-nav {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    box-shadow: var(--shadow-md);
+    position: sticky;
+    top: 0;
+    z-index: var(--z-sticky);
+}
+
+.enms-nav-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: var(--space-4);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.enms-nav-brand {
+    font-size: var(--text-xl);
+    font-weight: var(--font-bold);
+    color: var(--color-primary);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.enms-nav-brand:hover {
+    color: var(--color-primary-dark);
+}
+
+.enms-nav-menu {
+    display: flex;
+    list-style: none;
+    gap: var(--space-6);
+    margin: 0;
+    padding: 0;
+}
+
+.enms-nav-item {
+    position: relative;
+}
+
+.enms-nav-link {
+    color: var(--color-gray-700);
+    text-decoration: none;
+    font-weight: var(--font-medium);
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-md);
+    transition: all var(--transition-fast);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.enms-nav-link:hover {
+    background: var(--color-gray-100);
+    color: var(--color-primary);
+}
+
+.enms-nav-link.active {
+    background: var(--gradient-primary);
+    color: var(--color-white);
+}
+
+/* Mobile Navigation Toggle */
+.enms-nav-toggle {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: var(--space-2);
+}
+
+@media (max-width: 768px) {
+    .enms-nav-toggle {
+        display: block;
+    }
+    
+    .enms-nav-menu {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: var(--color-white);
+        flex-direction: column;
+        padding: var(--space-4);
+        box-shadow: var(--shadow-lg);
+    }
+    
+    .enms-nav-menu.active {
+        display: flex;
+    }
+}
+
+/* ============================================================================
+   CARD COMPONENTS
+   ============================================================================ */
+
+/* Base Card */
+.enms-card {
+    background: var(--color-white);
+    border-radius: var(--radius-xl);
+    padding: var(--space-6);
+    box-shadow: var(--shadow-lg);
+    transition: all var(--transition-base);
+}
+
+.enms-card:hover {
+    box-shadow: var(--shadow-xl);
+    transform: translateY(-2px);
+}
+
+.enms-card-header {
+    margin-bottom: var(--space-4);
+    padding-bottom: var(--space-4);
+    border-bottom: 2px solid var(--color-gray-100);
+}
+
+.enms-card-title {
+    font-size: var(--text-xl);
+    font-weight: var(--font-bold);
+    color: var(--color-gray-900);
+    margin: 0;
+}
+
+.enms-card-subtitle {
+    font-size: var(--text-sm);
+    color: var(--color-gray-500);
+    margin-top: var(--space-1);
+}
+
+.enms-card-body {
+    margin-bottom: var(--space-4);
+}
+
+.enms-card-footer {
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--color-gray-100);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Stat Card */
+.enms-stat-card {
+    background: var(--color-white);
+    border-radius: var(--radius-xl);
+    padding: var(--space-6);
+    box-shadow: var(--shadow-lg);
+    transition: all var(--transition-base);
+    text-align: center;
+}
+
+.enms-stat-card:hover {
+    box-shadow: var(--shadow-xl);
+    transform: translateY(-4px);
+}
+
+.enms-stat-icon {
+    font-size: var(--text-4xl);
+    margin-bottom: var(--space-3);
+}
+
+.enms-stat-value {
+    font-size: var(--text-5xl);
+    font-weight: var(--font-bold);
+    color: var(--color-primary);
+    margin-bottom: var(--space-2);
+    display: block;
+}
+
+.enms-stat-label {
+    font-size: var(--text-sm);
+    color: var(--color-gray-600);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: var(--font-medium);
+}
+
+.enms-stat-change {
+    margin-top: var(--space-2);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+}
+
+.enms-stat-change.positive {
+    color: var(--color-success);
+}
+
+.enms-stat-change.negative {
+    color: var(--color-error);
+}
+
+/* Status Cards with Color Variants */
+.enms-card-success {
+    border-left: 4px solid var(--color-success);
+}
+
+.enms-card-warning {
+    border-left: 4px solid var(--color-warning);
+}
+
+.enms-card-error {
+    border-left: 4px solid var(--color-error);
+}
+
+.enms-card-info {
+    border-left: 4px solid var(--color-info);
+}
+
+/* ============================================================================
+   BUTTON COMPONENTS
+   ============================================================================ */
+
+/* Base Button */
+.enms-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-6);
+    font-size: var(--text-base);
+    font-weight: var(--font-medium);
+    line-height: 1.5;
+    text-align: center;
+    text-decoration: none;
+    border: none;
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    white-space: nowrap;
+}
+
+.enms-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Button Variants */
+.enms-btn-primary {
+    background: var(--gradient-primary);
+    color: var(--color-white);
+}
+
+.enms-btn-primary:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.enms-btn-success {
+    background: var(--color-success);
+    color: var(--color-white);
+}
+
+.enms-btn-success:hover:not(:disabled) {
+    background: var(--color-success-dark);
+}
+
+.enms-btn-warning {
+    background: var(--color-warning);
+    color: var(--color-white);
+}
+
+.enms-btn-warning:hover:not(:disabled) {
+    background: var(--color-warning-dark);
+}
+
+.enms-btn-error {
+    background: var(--color-error);
+    color: var(--color-white);
+}
+
+.enms-btn-error:hover:not(:disabled) {
+    background: var(--color-error-dark);
+}
+
+.enms-btn-outline {
+    background: transparent;
+    color: var(--color-primary);
+    border: 2px solid var(--color-primary);
+}
+
+.enms-btn-outline:hover:not(:disabled) {
+    background: var(--color-primary);
+    color: var(--color-white);
+}
+
+.enms-btn-ghost {
+    background: transparent;
+    color: var(--color-primary);
+}
+
+.enms-btn-ghost:hover:not(:disabled) {
+    background: var(--color-gray-100);
+}
+
+/* Button Sizes */
+.enms-btn-sm {
+    padding: var(--space-2) var(--space-4);
+    font-size: var(--text-sm);
+}
+
+.enms-btn-lg {
+    padding: var(--space-4) var(--space-8);
+    font-size: var(--text-lg);
+}
+
+/* ============================================================================
+   BADGE & STATUS INDICATORS
+   ============================================================================ */
+
+/* Badge */
+.enms-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--space-1) var(--space-3);
+    font-size: var(--text-xs);
+    font-weight: var(--font-semibold);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-radius: var(--radius-full);
+}
+
+.enms-badge-success {
+    background: var(--color-success-light);
+    color: var(--color-success-dark);
+}
+
+.enms-badge-warning {
+    background: var(--color-warning-light);
+    color: var(--color-warning-dark);
+}
+
+.enms-badge-error {
+    background: var(--color-error-light);
+    color: var(--color-error-dark);
+}
+
+.enms-badge-info {
+    background: var(--color-info-light);
+    color: var(--color-info-dark);
+}
+
+.enms-badge-gray {
+    background: var(--color-gray-200);
+    color: var(--color-gray-700);
+}
+
+/* Status Dot */
+.enms-status-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: var(--radius-full);
+    margin-right: var(--space-2);
+}
+
+.enms-status-dot.online {
+    background: var(--color-success);
+    box-shadow: 0 0 0 3px var(--color-success-light);
+}
+
+.enms-status-dot.offline {
+    background: var(--color-gray-400);
+    box-shadow: 0 0 0 3px var(--color-gray-200);
+}
+
+.enms-status-dot.warning {
+    background: var(--color-warning);
+    box-shadow: 0 0 0 3px var(--color-warning-light);
+}
+
+.enms-status-dot.error {
+    background: var(--color-error);
+    box-shadow: 0 0 0 3px var(--color-error-light);
+}
+
+/* Pulse Animation for Real-Time Indicators */
+@keyframes enms-pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.enms-pulse {
+    animation: enms-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* ============================================================================
+   HEADER & HERO COMPONENTS
+   ============================================================================ */
+
+.enms-header {
+    text-align: center;
+    padding: var(--space-12) var(--space-4);
+    color: var(--color-white);
+}
+
+.enms-header h1 {
+    font-size: var(--text-5xl);
+    font-weight: var(--font-bold);
+    margin-bottom: var(--space-3);
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.enms-header p {
+    font-size: var(--text-xl);
+    opacity: 0.9;
+    margin-bottom: var(--space-6);
+}
+
+/* ============================================================================
+   STATUS BAR
+   ============================================================================ */
+
+.enms-status-bar {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    border-radius: var(--radius-xl);
+    padding: var(--space-4);
+    margin-bottom: var(--space-6);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+}
+
+.enms-status-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--color-white);
+    font-weight: var(--font-medium);
+}
+
+/* ============================================================================
+   LOADING & SKELETON STATES
+   ============================================================================ */
+
+.enms-loading {
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-top-color: var(--color-white);
+    border-radius: var(--radius-full);
+    animation: enms-spin 1s linear infinite;
+}
+
+@keyframes enms-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.enms-skeleton {
+    background: linear-gradient(90deg, var(--color-gray-200) 25%, var(--color-gray-100) 50%, var(--color-gray-200) 75%);
+    background-size: 200% 100%;
+    animation: enms-shimmer 1.5s infinite;
+    border-radius: var(--radius-md);
+}
+
+@keyframes enms-shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* ============================================================================
+   ALERT & NOTIFICATION COMPONENTS
+   ============================================================================ */
+
+.enms-alert {
+    padding: var(--space-4);
+    border-radius: var(--radius-lg);
+    border-left: 4px solid;
+    margin-bottom: var(--space-4);
+}
+
+.enms-alert-success {
+    background: var(--color-success-light);
+    border-color: var(--color-success);
+    color: var(--color-success-dark);
+}
+
+.enms-alert-warning {
+    background: var(--color-warning-light);
+    border-color: var(--color-warning);
+    color: var(--color-warning-dark);
+}
+
+.enms-alert-error {
+    background: var(--color-error-light);
+    border-color: var(--color-error);
+    color: var(--color-error-dark);
+}
+
+.enms-alert-info {
+    background: var(--color-info-light);
+    border-color: var(--color-info);
+    color: var(--color-info-dark);
+}
+
+/* ============================================================================
+   UTILITY CLASSES
+   ============================================================================ */
+
+/* Text Alignment */
+.text-left { text-align: left; }
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+
+/* Text Colors */
+.text-primary { color: var(--color-primary); }
+.text-success { color: var(--color-success); }
+.text-warning { color: var(--color-warning); }
+.text-error { color: var(--color-error); }
+.text-gray { color: var(--color-gray-600); }
+.text-white { color: var(--color-white); }
+
+/* Font Weights */
+.font-light { font-weight: var(--font-light); }
+.font-normal { font-weight: var(--font-normal); }
+.font-medium { font-weight: var(--font-medium); }
+.font-semibold { font-weight: var(--font-semibold); }
+.font-bold { font-weight: var(--font-bold); }
+
+/* Spacing Utilities */
+.mt-2 { margin-top: var(--space-2); }
+.mt-4 { margin-top: var(--space-4); }
+.mt-6 { margin-top: var(--space-6); }
+.mb-2 { margin-bottom: var(--space-2); }
+.mb-4 { margin-bottom: var(--space-4); }
+.mb-6 { margin-bottom: var(--space-6); }
+.p-4 { padding: var(--space-4); }
+.p-6 { padding: var(--space-6); }
+
+/* Display Utilities */
+.hidden { display: none; }
+.block { display: block; }
+.inline-block { display: inline-block; }
+
+/* Responsive Utilities */
+@media (max-width: 768px) {
+    .hidden-mobile { display: none; }
+}
+
+@media (min-width: 769px) {
+    .hidden-desktop { display: none; }
+}
+
+/* ============================================================================
+   ANIMATIONS
+   ============================================================================ */
+
+@keyframes enms-fade-in {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes enms-slide-up {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes enms-slide-down {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.enms-fade-in {
+    animation: enms-fade-in var(--transition-base);
+}
+
+.enms-slide-up {
+    animation: enms-slide-up var(--transition-base);
+}
+
+.enms-slide-down {
+    animation: enms-slide-down var(--transition-base);
+}
+
+/* ============================================================================
+   FOOTER
+   ============================================================================ */
+
+.enms-footer {
+    background: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(10px);
+    color: var(--color-white);
+    text-align: center;
+    padding: var(--space-6);
+    margin-top: var(--space-12);
+}
+
+.enms-footer p {
+    margin: 0;
+    opacity: 0.8;
+}
+
+/* ============================================================================
+   ANIMATED NUMBER COUNTERS
+   ============================================================================ */
+
+.enms-stat-number {
+    transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
+}
+
+.enms-stat-number.counting {
+    animation: enms-number-pulse 0.3s ease-in-out;
+}
+
+@keyframes enms-number-pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+/* Real-time data indicator glow */
+.enms-stat-number.live-update {
+    animation: enms-live-glow 1s ease-in-out;
+}
+
+@keyframes enms-live-glow {
+    0%, 100% {
+        text-shadow: none;
+    }
+    50% {
+        text-shadow: 0 0 10px currentColor;
+    }
+}
+
+/* WebSocket connected indicator */
+.enms-status-dot.ws-connected {
+    box-shadow: 0 0 0 3px var(--color-success-light), 0 0 10px var(--color-success);
+    animation: enms-ws-pulse 2s ease-in-out infinite;
+}
+
+@keyframes enms-ws-pulse {
+    0%, 100% {
+        box-shadow: 0 0 0 3px var(--color-success-light), 0 0 10px var(--color-success);
+    }
+    50% {
+        box-shadow: 0 0 0 6px var(--color-success-light), 0 0 15px var(--color-success);
+    }
+}
+
+/* ============================================================================
+   PRINT STYLES
+   ============================================================================ */
+
+@media print {
+    .enms-nav,
+    .enms-footer,
+    .enms-btn {
+        display: none;
+    }
+    
+    body {
+        background: white;
+    }
+    
+    .enms-card {
+        box-shadow: none;
+        border: 1px solid var(--color-gray-300);
+    }
+}

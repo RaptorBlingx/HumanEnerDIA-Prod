@@ -1,0 +1,1758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Model Performance Tracking | EnMS</title>
+    
+    <!-- Google Fonts - Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Industrial Design System -->
+    <link rel="stylesheet" href="/css/enms-industrial.css">
+    
+    <!-- Sidebar Component -->
+    <link rel="stylesheet" href="/css/sidebar.css?v=1765871462">
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
+    <!-- OVOS Voice Widget CSS -->
+    <link rel="stylesheet" href="/css/ovos-voice-widget.css?v=20260108f">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background-color: #f8fafc;
+            min-height: 100vh;
+        }
+        
+        .main-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 64px 40px 80px;
+        }
+        
+        .controls-panel {
+            background: white;
+            border-radius: 16px;
+            padding: 32px 40px;
+            margin-bottom: 48px;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        
+        .controls-panel label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #374151;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            margin-bottom: 24px;
+            transition: all 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+        }
+        
+        .stat-card.healthy {
+            border-left: 4px solid #2ECC71;
+        }
+        
+        .stat-card.warning {
+            border-left: 4px solid #F39C12;
+        }
+        
+        .stat-card.critical {
+            border-left: 4px solid #E74C3C;
+        }
+        
+        .stat-value {
+            font-size: 42px;
+            font-weight: 700;
+            margin: 8px 0;
+            line-height: 1;
+            color: #1f2937;
+        }
+        
+        .stat-label {
+            color: #6b7280;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 600;
+        }
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: var(--font-medium);
+        }
+        
+        .alert-banner {
+            background: rgba(243, 156, 18, 0.1);
+            border-left: 4px solid var(--color-warning);
+            border-radius: var(--radius-lg);
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .alert-banner.critical {
+            background: rgba(231, 76, 60, 0.1);
+            border-left-color: var(--color-error);
+        }
+        
+        .chart-container {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            margin-bottom: 32px;
+            height: 400px;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        
+        .model-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            margin-bottom: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .model-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+        }
+        
+        .model-card.active {
+            border: 2px solid #2ECC71;
+        }
+        
+        .trend-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: var(--radius-lg);
+            font-weight: var(--font-semibold);
+            font-size: 0.85rem;
+        }
+        
+        .trend-improving {
+            background: rgba(46, 204, 113, 0.15);
+            color: var(--color-success-dark);
+        }
+        
+        .trend-stable {
+            background: rgba(52, 152, 219, 0.15);
+            color: var(--color-info-dark);
+        }
+        
+        .trend-degrading {
+            background: rgba(231, 76, 60, 0.15);
+            color: var(--color-error-dark);
+        }
+        
+        .action-button {
+            margin-top: 1rem;
+        }
+        
+        /* Premium Loading Overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            backdrop-filter: blur(10px);
+        }
+        
+        .loading-overlay.active {
+            display: flex;
+        }
+        
+        .loading-content {
+            text-align: center;
+            color: white;
+        }
+        
+        .loading-spinner {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 2rem;
+            position: relative;
+        }
+        
+        .spinner-ring {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border: 4px solid transparent;
+            border-top-color: var(--color-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        .spinner-ring:nth-child(2) {
+            border-top-color: var(--color-success);
+            animation-duration: 0.8s;
+            animation-direction: reverse;
+        }
+        
+        .spinner-ring:nth-child(3) {
+            border-top-color: var(--color-secondary);
+            animation-duration: 1.2s;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
+            font-size: 1.5rem;
+            font-weight: var(--font-semibold);
+            margin-bottom: 0.5rem;
+            background: linear-gradient(90deg, var(--color-primary), var(--color-success), var(--color-primary));
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shimmer 2s linear infinite;
+        }
+        
+        .loading-subtext {
+            font-size: 1rem;
+            color: #bbb;
+            margin-bottom: 1.5rem;
+        }
+        
+        .loading-progress {
+            width: 300px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            overflow: hidden;
+            margin: 0 auto;
+        }
+        
+        .loading-progress-bar {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--color-primary), var(--color-success));
+            border-radius: 2px;
+            animation: progress 3s ease-in-out infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { background-position: 0% center; }
+            100% { background-position: 200% center; }
+        }
+        
+        @keyframes progress {
+            0% { width: 0%; }
+            50% { width: 70%; }
+            100% { width: 100%; }
+        }
+        
+        /* Error Toast */
+        .error-toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, var(--color-error), var(--color-error-dark));
+            color: white;
+            padding: 1.5rem;
+            border-radius: var(--radius-lg);
+            box-shadow: 0 10px 40px rgba(231, 76, 60, 0.4);
+            display: none;
+            z-index: 10000;
+            min-width: 350px;
+            max-width: 500px;
+            animation: slideInRight 0.3s ease-out;
+        }
+        
+        .error-toast.active {
+            display: block;
+        }
+        
+        .error-toast-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        
+        .error-toast-icon {
+            font-size: 1.5rem;
+            margin-right: 0.75rem;
+        }
+        
+        .error-toast-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        
+        .error-toast-message {
+            font-size: 0.95rem;
+            opacity: 0.95;
+            line-height: 1.5;
+        }
+        
+        .error-toast-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1rem;
+            line-height: 1;
+            transition: background 0.2s;
+        }
+        
+        .error-toast-close:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        @keyframes slideInRight {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        .drift-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+        }
+        
+        .drift-indicator.no-drift {
+            background: #2ECC71;
+            box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.2);
+        }
+        
+        .drift-indicator.drift {
+            background: #E74C3C;
+            box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.2);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        /* Navigation Bar */
+        .viz-nav {
+            background: linear-gradient(90deg, #1a365d 0%, #2d3748 100%);
+            padding: 0.75rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        .viz-nav-brand {
+            color: white;
+            font-weight: 600;
+            font-size: 1.1rem;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .viz-nav-brand:hover { color: #a0aec0; }
+        .viz-nav-links {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+        .viz-nav-link {
+            color: #e2e8f0;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+        .viz-nav-link:hover { background: rgba(255,255,255,0.1); color: white; }
+        .viz-nav-link.active { background: #667eea; color: white; }
+        .viz-nav-divider { color: #4a5568; margin: 0 0.25rem; }
+    </style>
+</head>
+<body>
+    <!-- Hamburger Menu Header -->
+    <header class="industrial-header" style="padding: 1rem 2rem;">
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 1rem; width: 100%;">
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <button onclick="toggleSidebar()" class="hamburger-btn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
+                <a href="/" class="industrial-logo" style="display: flex; align-items: center; gap: 0.5rem; color: white; text-decoration: none;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                    </svg>
+                    <span>HumanEnerDIA</span>
+                </a>
+            </div>
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <!-- Notification Bell -->
+                <div class="notification-bell-container">
+                    <button id="notification-bell" class="notification-bell-btn" onclick="toggleNotificationPanel()" title="Notifications">
+                        <i class="bi bi-bell-fill"></i>
+                        <span id="notification-badge" class="notification-badge" style="display: none;"></span>
+                    </button>
+                    <!-- Notification Dropdown Panel -->
+                    <div id="notification-panel" class="notification-panel" style="display: none;">
+                        <div class="notification-panel-header">
+                            <h3><i class="bi bi-bell"></i> Notifications</h3>
+                            <button onclick="clearAllNotifications()" class="clear-all-btn" title="Clear all">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                        <div id="notification-list" class="notification-list">
+                            <div class="notification-empty">
+                                <i class="bi bi-bell-slash"></i>
+                                <p>No notifications yet</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button id="ovos-enable-voice-nav" style="display: none; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 10px 20px; border-radius: 25px; cursor: pointer; font-weight: 500; align-items: center; gap: 8px; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                        <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                    </svg>
+                    <span>Enable Voice</span>
+                </button>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Sidebar will be injected by sidebar.js -->
+
+    <!-- Premium Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="loading-content">
+            <div class="loading-spinner">
+                <div class="spinner-ring"></div>
+                <div class="spinner-ring"></div>
+                <div class="spinner-ring"></div>
+            </div>
+            <div class="loading-text" id="loading-text">Training Model...</div>
+            <div class="loading-subtext" id="loading-subtext">This may take a few minutes. Please don't close this page.</div>
+            <div class="loading-progress">
+                <div class="loading-progress-bar"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Error Toast -->
+    <div id="error-toast" class="error-toast">
+        <button class="error-toast-close" onclick="closeErrorToast()">×</button>
+        <div class="error-toast-header">
+            <span class="error-toast-icon">⚠️</span>
+            <span class="error-toast-title" id="error-title">Error</span>
+        </div>
+        <div class="error-toast-message" id="error-message">Something went wrong</div>
+    </div>
+
+    <div class="main-container">
+        <!-- Controls Panel -->
+        <div class="controls-panel">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label"><strong>Model Type</strong></label>
+                    <select id="model-type" class="form-select">
+                        <option value="baseline">Energy Baseline</option>
+                        <option value="anomaly">Anomaly Detection</option>
+                        <option value="forecast_arima">Forecast (ARIMA)</option>
+                        <option value="forecast_prophet">Forecast (Prophet)</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label"><strong>Machine</strong></label>
+                    <select id="machine-select" class="form-select">
+                        <!-- Populated dynamically -->
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label"><strong>Time Period</strong></label>
+                    <select id="time-period" class="form-select">
+                        <option value="7">Last 7 days</option>
+                        <option value="30" selected>Last 30 days</option>
+                        <option value="90">Last 90 days</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label"><strong>&nbsp;</strong></label>
+                    <button class="btn btn-primary w-100" onclick="loadDashboard()">
+                        <i class="bi bi-arrow-repeat"></i> Refresh
+                    </button>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label"><strong>&nbsp;</strong></label>
+                    <button class="btn btn-info w-100" onclick="showModelDetails()" id="model-details-btn" disabled>
+                        <i class="bi bi-info-circle"></i> Get Model Details
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Alerts Section -->
+        <div id="alerts-section"></div>
+        
+        <!-- Stats Row -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="stat-card healthy">
+                    <div class="stat-label">Current R²</div>
+                    <h2 class="stat-value" id="current-r2">-</h2>
+                    <small id="r2-change" class="text-muted">-</small>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card" id="drift-card">
+                    <div class="stat-label">Drift Status</div>
+                    <h2 class="stat-value" id="drift-status">
+                        <span class="drift-indicator no-drift"></span>
+                        <span id="drift-text">No Drift</span>
+                    </h2>
+                    <small id="drift-score-text" class="text-muted">-</small>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-label">Model Version</div>
+                    <h2 class="stat-value" id="model-version">-</h2>
+                    <small id="last-trained" class="text-muted">-</small>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-label">Predictions Made</div>
+                    <h2 class="stat-value" id="predictions-count">-</h2>
+                    <small id="predictions-period" class="text-muted">-</small>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Performance Trend Chart -->
+        <div class="chart-container">
+            <canvas id="performance-chart"></canvas>
+        </div>
+        
+        <!-- Metrics Comparison Chart -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="chart-container" style="height: 350px;">
+                    <canvas id="metrics-chart"></canvas>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="chart-container" style="height: 350px;">
+                    <canvas id="drift-chart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Model Versions List -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h4>Model Versions History</h4>
+                <div id="model-versions-list"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // ====================================================================
+        // CONFIGURATION
+        // ====================================================================
+        
+        const API_BASE = window.location.port === '8001' ? '/api/v1' : '/api/analytics/api/v1';
+        const API_BASE_URL = `${API_BASE}/model-performance`;
+        const COMPARISON_API_URL = `${API_BASE}/comparison`;
+        
+        let charts = {};
+        
+        // ====================================================================
+        // DEBUG LOGGING
+        // ====================================================================
+        console.log('=== MODEL PERFORMANCE PAGE LOADED ===');
+        console.log('Current URL:', window.location.href);
+        console.log('API_BASE_URL:', API_BASE_URL);
+        console.log('Full API URL will be:', window.location.origin + API_BASE_URL);
+        
+        // ====================================================================
+        // INITIALIZATION
+        // ====================================================================
+        
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('DOM Content Loaded - Starting initialization...');
+            await loadMachines();
+            await loadDashboard();
+            
+            // Add change listeners for all controls
+            document.getElementById('machine-select').addEventListener('change', () => {
+                console.log('[machine-select] Changed - reloading dashboard');
+                clearDashboard();
+                loadDashboard();
+            });
+            
+            document.getElementById('model-type').addEventListener('change', () => {
+                console.log('[model-type] Changed - reloading dashboard');
+                clearDashboard();
+                loadDashboard();
+            });
+            
+            document.getElementById('time-period').addEventListener('change', () => {
+                console.log('[time-period] Changed - reloading dashboard');
+                loadDashboard();
+            });
+            
+            // Auto-refresh every 60 seconds
+            setInterval(loadDashboard, 60000);
+            console.log('Initialization complete.');
+        });
+        
+        // Clear dashboard data before loading new machine
+        function clearDashboard() {
+            // Reset stat cards
+            document.getElementById('current-r2').textContent = '-';
+            document.getElementById('r2-change').innerHTML = '-';
+            document.getElementById('drift-text').textContent = 'Loading...';
+            document.getElementById('drift-score-text').textContent = '-';
+            document.getElementById('model-version').textContent = '-';
+            document.getElementById('last-trained').textContent = '-';
+            document.getElementById('predictions-count').textContent = '-';
+            document.getElementById('predictions-period').textContent = '-';
+            
+            // Reset drift card to neutral
+            const driftCard = document.getElementById('drift-card');
+            driftCard.className = 'stat-card';
+            const driftIndicator = document.querySelector('.drift-indicator');
+            if (driftIndicator) driftIndicator.className = 'drift-indicator';
+            
+            // Clear alerts
+            document.getElementById('alerts-section').innerHTML = '';
+            
+            // Clear model versions list
+            document.getElementById('model-versions-list').innerHTML = '<p class="text-muted">Loading...</p>';
+            
+            // Destroy charts to prevent stale data
+            if (charts.performance) { charts.performance.destroy(); charts.performance = null; }
+            if (charts.metrics) { charts.metrics.destroy(); charts.metrics = null; }
+            if (charts.drift) { charts.drift.destroy(); charts.drift = null; }
+        }
+        
+        // ====================================================================
+        // DATA LOADING
+        // ====================================================================
+        
+        async function loadMachines() {
+            try {
+                const url = `${COMPARISON_API_URL}/available`;
+                console.log('[loadMachines] Fetching:', url);
+                console.log('[loadMachines] Full URL:', window.location.origin + url);
+                
+                const response = await fetch(url);
+                console.log('[loadMachines] Response status:', response.status);
+                
+                const machines = await response.json();
+                console.log('[loadMachines] Machines loaded:', machines.length);
+                
+                const select = document.getElementById('machine-select');
+                select.innerHTML = machines.map(m => `
+                    <option value="${m.id}">${m.name}</option>
+                `).join('');
+                
+            } catch (error) {
+                console.error('[loadMachines] Error loading machines:', error);
+            }
+        }
+        
+        async function loadDashboard() {
+            try {
+                const modelType = document.getElementById('model-type').value;
+                const machineId = document.getElementById('machine-select').value;
+                const days = document.getElementById('time-period').value;
+                
+                if (!machineId) return;
+                
+                // First: Load real model summary from energy_baselines
+                await loadModelSummary(modelType, machineId);
+                
+                // Second: Try to load performance trend (historical metrics)
+                await loadPerformanceTrend(modelType, machineId, days);
+                
+                // Load active alerts
+                await loadAlerts(machineId, modelType);
+                
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+            }
+        }
+        
+        // NEW: Load real model data from energy_baselines table
+        async function loadModelSummary(modelType, machineId) {
+            try {
+                const url = `${API_BASE_URL}/summary?machine_id=${machineId}&model_type=${modelType}`;
+                console.log('[loadModelSummary] Fetching:', url);
+                
+                const response = await fetch(url);
+                
+                if (!response.ok) {
+                    console.error('[loadModelSummary] Error:', response.status);
+                    showNoModelMessage(modelType);
+                    return;
+                }
+                
+                const data = await response.json();
+                console.log('[loadModelSummary] Data:', data);
+                
+                if (!data.has_model) {
+                    showNoModelMessage(modelType, data.message);
+                    return;
+                }
+                
+                // Update stats with real baseline data
+                updateStatsFromSummary(data);
+                
+                // Update model versions list if available
+                if (data.versions && data.versions.length > 0) {
+                    updateModelVersionsFromSummary(data.versions);
+                }
+                
+            } catch (error) {
+                console.error('[loadModelSummary] Error:', error);
+                showNoModelMessage(modelType);
+            }
+        }
+        
+        function showNoModelMessage(modelType, message) {
+            const typeName = {
+                'baseline': 'Baseline',
+                'anomaly': 'Anomaly Detection',
+                'forecast_arima': 'ARIMA Forecast',
+                'forecast_prophet': 'Prophet Forecast'
+            }[modelType] || modelType;
+            
+            const pageLink = {
+                'baseline': '/ui/baseline',
+                'anomaly': '/ui/anomaly',
+                'forecast_arima': '/ui/forecast',
+                'forecast_prophet': '/ui/forecast'
+            }[modelType] || '/ui/baseline';
+            
+            // Update stats to show no model
+            document.getElementById('current-r2').textContent = 'N/A';
+            document.getElementById('r2-change').innerHTML = '<a href="' + pageLink + '" class="text-primary">Train Model →</a>';
+            document.getElementById('drift-text').textContent = 'No Model';
+            document.getElementById('drift-score-text').textContent = message || 'Train a model first';
+            document.getElementById('model-version').textContent = '-';
+            document.getElementById('last-trained').textContent = 'Not trained';
+            document.getElementById('predictions-count').textContent = '-';
+            document.getElementById('predictions-period').textContent = '-';
+            
+            // Show alert
+            document.getElementById('alerts-section').innerHTML = `
+                <div class="alert-banner" style="background: rgba(52, 152, 219, 0.1); border-left-color: #3498db;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong><i class="bi bi-info-circle"></i> No ${typeName} Model</strong>
+                            <p class="mb-0 mt-1">${message || 'No model has been trained for this machine yet.'}</p>
+                        </div>
+                        <a href="${pageLink}" class="btn btn-sm btn-primary">
+                            <i class="bi bi-plus-circle"></i> Train Model
+                        </a>
+                    </div>
+                </div>
+            `;
+            
+            // Clear versions list
+            document.getElementById('model-versions-list').innerHTML = 
+                '<p class="text-muted">No models trained yet. <a href="' + pageLink + '">Train your first model →</a></p>';
+        }
+        
+        function updateStatsFromSummary(data) {
+            // Enable/disable "Get Model Details" button
+            const modelDetailsBtn = document.getElementById('model-details-btn');
+            if (data.model_id) {
+                modelDetailsBtn.disabled = false;
+            } else {
+                modelDetailsBtn.disabled = true;
+            }
+            
+            // R² Score
+            if (data.r_squared !== null && data.r_squared !== undefined) {
+                document.getElementById('current-r2').textContent = data.r_squared.toFixed(4);
+                
+                // Color code based on quality
+                const r2Card = document.getElementById('current-r2').closest('.stat-card');
+                if (data.r_squared >= 0.8) {
+                    r2Card.className = 'stat-card healthy';
+                    document.getElementById('r2-change').innerHTML = '<span class="text-success">✓ Good fit</span>';
+                } else if (data.r_squared >= 0.6) {
+                    r2Card.className = 'stat-card warning';
+                    document.getElementById('r2-change').innerHTML = '<span class="text-warning">⚠ Moderate fit</span>';
+                } else {
+                    r2Card.className = 'stat-card critical';
+                    document.getElementById('r2-change').innerHTML = '<span class="text-danger">✗ Poor fit</span>';
+                }
+            } else {
+                document.getElementById('current-r2').textContent = 'N/A';
+                document.getElementById('r2-change').innerHTML = '-';
+            }
+            
+            // Drift status (placeholder - no real drift tracking yet)
+            const driftCard = document.getElementById('drift-card');
+            const driftIndicator = document.querySelector('.drift-indicator');
+            const driftText = document.getElementById('drift-text');
+            const driftScoreText = document.getElementById('drift-score-text');
+            
+            driftCard.className = 'stat-card healthy';
+            if (driftIndicator) driftIndicator.className = 'drift-indicator no-drift';
+            driftText.textContent = 'Stable';
+            driftScoreText.textContent = 'Model performing as expected';
+            
+            // Model version
+            document.getElementById('model-version').textContent = `v${data.model_version}`;
+            if (data.created_at) {
+                const date = new Date(data.created_at);
+                document.getElementById('last-trained').textContent = `Trained: ${date.toLocaleDateString()}`;
+            } else {
+                document.getElementById('last-trained').textContent = '-';
+            }
+            
+            // Training samples as "predictions count"
+            if (data.training_samples) {
+                document.getElementById('predictions-count').textContent = data.training_samples.toLocaleString();
+                document.getElementById('predictions-period').textContent = 'training samples';
+            } else {
+                document.getElementById('predictions-count').textContent = '-';
+                document.getElementById('predictions-period').textContent = '-';
+            }
+        }
+        
+        function updateModelVersionsFromSummary(versions) {
+            const versionsList = document.getElementById('model-versions-list');
+            
+            if (!versions || versions.length === 0) {
+                versionsList.innerHTML = '<p class="text-muted">No version history available</p>';
+                return;
+            }
+            
+            versionsList.innerHTML = versions.map((v, index) => {
+                const isActive = v.is_active;
+                const date = v.created_at ? new Date(v.created_at).toLocaleDateString() : 'Unknown';
+                
+                return `
+                    <div class="model-card ${isActive ? 'active' : ''}">
+                        <div class="row align-items-center">
+                            <div class="col-md-2">
+                                <h5 class="mb-0">Version ${v.version}</h5>
+                                ${isActive ? '<span class="badge bg-success">Active</span>' : ''}
+                            </div>
+                            <div class="col-md-2">
+                                <small class="text-muted">R²</small>
+                                <div><strong>${v.r_squared ? v.r_squared.toFixed(4) : 'N/A'}</strong></div>
+                            </div>
+                            <div class="col-md-2">
+                                <small class="text-muted">RMSE</small>
+                                <div><strong>${v.rmse ? v.rmse.toFixed(2) : 'N/A'}</strong></div>
+                            </div>
+                            <div class="col-md-3">
+                                <small class="text-muted">Created</small>
+                                <div>${date}</div>
+                            </div>
+                            <div class="col-md-3">
+                                ${!isActive ? `
+                                    <a href="/ui/baseline" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-arrow-counterclockwise"></i> Manage in Baseline
+                                    </a>
+                                ` : '<span class="text-muted">Currently Active</span>'}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        async function loadPerformanceTrend(modelType, machineId, days) {
+            try {
+                const url = `${API_BASE_URL}/metrics/trend?model_type=${modelType}&machine_id=${machineId}&days=${days}`;
+                console.log('[loadPerformanceTrend] Fetching:', url);
+                console.log('[loadPerformanceTrend] Full URL:', window.location.origin + url);
+                
+                const response = await fetch(url);
+                console.log('[loadPerformanceTrend] Response status:', response.status);
+                console.log('[loadPerformanceTrend] Response OK:', response.ok);
+                
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        console.log('[loadPerformanceTrend] 404 - No performance data available yet');
+                        return;
+                    }
+                    const errorText = await response.text();
+                    console.error('[loadPerformanceTrend] Error response:', errorText);
+                    throw new Error(`API returned ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                
+                // Update stats
+                updateStats(data);
+                
+                // Update charts
+                updatePerformanceChart(data.metrics);
+                updateMetricsChart(data.metrics);
+                updateDriftChart(data.metrics);
+                
+                // Update model versions
+                updateModelVersions(data.metrics);
+                
+            } catch (error) {
+                console.error('Error loading performance trend:', error);
+                showError('Failed to Load Performance Data', error.message);
+            }
+        }
+        
+        async function loadAlerts(machineId, modelType) {
+            try {
+                const url = `${API_BASE_URL}/alerts/active?machine_id=${machineId}&model_type=${modelType}`;
+                console.log('[loadAlerts] Fetching:', url);
+                console.log('[loadAlerts] Full URL:', window.location.origin + url);
+                
+                const response = await fetch(url);
+                console.log('[loadAlerts] Response status:', response.status);
+                
+                if (!response.ok) {
+                    console.error('[loadAlerts] API error:', response.status, response.statusText);
+                    const alertsSection = document.getElementById('alerts-section');
+                    alertsSection.innerHTML = '';
+                    return;
+                }
+                
+                const alerts = await response.json();
+                
+                // Defensive check: ensure alerts is an array
+                if (!Array.isArray(alerts)) {
+                    console.error('[loadAlerts] Expected array, got:', typeof alerts, alerts);
+                    const alertsSection = document.getElementById('alerts-section');
+                    alertsSection.innerHTML = '';
+                    return;
+                }
+                
+                console.log('[loadAlerts] Alerts received:', alerts.length);
+                
+                const alertsSection = document.getElementById('alerts-section');
+                
+                if (alerts.length === 0) {
+                    alertsSection.innerHTML = '';
+                    return;
+                }
+                
+                alertsSection.innerHTML = alerts.map(alert => `
+                    <div class="alert-banner ${alert.severity}">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>
+                                    <i class="bi bi-exclamation-triangle"></i>
+                                    ${alert.alert_type.replace(/_/g, ' ').toUpperCase()}
+                                </strong>
+                                <p class="mb-0 mt-1">${alert.alert_message}</p>
+                                <small class="text-muted">
+                                    ${new Date(alert.alert_timestamp).toLocaleString()}
+                                    ${alert.auto_action_taken ? ' • Auto-action taken' : ''}
+                                </small>
+                            </div>
+                            <button class="btn btn-sm btn-outline-secondary" onclick="resolveAlert('${alert.id}')">
+                                Resolve
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+                
+            } catch (error) {
+                console.error('Error loading alerts:', error);
+            }
+        }
+        
+        // ====================================================================
+        // UI UPDATES
+        // ====================================================================
+        
+        function updateStats(data) {
+            const latest = data.metrics[data.metrics.length - 1];
+            const previous = data.metrics[data.metrics.length - 2];
+            
+            // Current R²
+            if (latest.r_squared !== null) {
+                document.getElementById('current-r2').textContent = latest.r_squared.toFixed(4);
+                
+                if (previous && previous.r_squared !== null) {
+                    const change = ((latest.r_squared - previous.r_squared) / previous.r_squared * 100);
+                    const changeText = change >= 0 ? `↑ ${change.toFixed(2)}%` : `↓ ${Math.abs(change).toFixed(2)}%`;
+                    const changeColor = change >= 0 ? 'text-success' : 'text-danger';
+                    document.getElementById('r2-change').innerHTML = `<span class="${changeColor}">${changeText}</span>`;
+                }
+            }
+            
+            // Drift status
+            const driftCard = document.getElementById('drift-card');
+            const driftIndicator = document.querySelector('.drift-indicator');
+            const driftText = document.getElementById('drift-text');
+            const driftScoreText = document.getElementById('drift-score-text');
+            
+            if (latest.drift_detected) {
+                driftCard.className = 'stat-card warning';
+                driftIndicator.className = 'drift-indicator drift';
+                driftText.textContent = 'Drift Detected';
+                driftScoreText.textContent = `Score: ${latest.drift_score ? latest.drift_score.toFixed(4) : 'N/A'}`;
+            } else {
+                driftCard.className = 'stat-card healthy';
+                driftIndicator.className = 'drift-indicator no-drift';
+                driftText.textContent = 'No Drift';
+                driftScoreText.textContent = 'Model performing well';
+            }
+            
+            // Model version
+            document.getElementById('model-version').textContent = `v${latest.model_version}`;
+            document.getElementById('last-trained').textContent = `Evaluated: ${new Date(latest.evaluation_date).toLocaleDateString()}`;
+            
+            // Predictions count
+            document.getElementById('predictions-count').textContent = latest.sample_count.toLocaleString();
+            document.getElementById('predictions-period').textContent = `in evaluation period`;
+        }
+        
+        function updatePerformanceChart(metrics) {
+            const ctx = document.getElementById('performance-chart').getContext('2d');
+            
+            if (charts.performance) {
+                charts.performance.destroy();
+            }
+            
+            const labels = metrics.map(m => new Date(m.evaluation_date).toLocaleDateString());
+            const r2Data = metrics.map(m => m.r_squared);
+            const rmseData = metrics.map(m => m.rmse);
+            
+            charts.performance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'R² Score',
+                            data: r2Data,
+                            borderColor: '#43e97b',
+                            backgroundColor: 'rgba(67, 233, 123, 0.1)',
+                            yAxisID: 'y',
+                            tension: 0.4
+                        },
+                        {
+                            label: 'RMSE',
+                            data: rmseData,
+                            borderColor: '#f093fb',
+                            backgroundColor: 'rgba(240, 147, 251, 0.1)',
+                            yAxisID: 'y1',
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Model Performance Over Time'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: 'R² Score'
+                            }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: {
+                                display: true,
+                                text: 'RMSE'
+                            },
+                            grid: {
+                                drawOnChartArea: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function updateMetricsChart(metrics) {
+            const ctx = document.getElementById('metrics-chart').getContext('2d');
+            
+            if (charts.metrics) {
+                charts.metrics.destroy();
+            }
+            
+            const latest = metrics[metrics.length - 1];
+            
+            charts.metrics = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['R²', 'MAE', 'RMSE', 'Completeness'],
+                    datasets: [{
+                        label: 'Current Metrics',
+                        data: [
+                            latest.r_squared,
+                            latest.mae,
+                            latest.rmse,
+                            latest.data_completeness
+                        ],
+                        backgroundColor: [
+                            'rgba(67, 233, 123, 0.7)',
+                            'rgba(79, 172, 254, 0.7)',
+                            'rgba(240, 147, 251, 0.7)',
+                            'rgba(255, 152, 0, 0.7)'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Current Performance Metrics'
+                        }
+                    }
+                }
+            });
+        }
+        
+        function updateDriftChart(metrics) {
+            const ctx = document.getElementById('drift-chart').getContext('2d');
+            
+            if (charts.drift) {
+                charts.drift.destroy();
+            }
+            
+            const labels = metrics.map(m => new Date(m.evaluation_date).toLocaleDateString());
+            const driftScores = metrics.map(m => m.drift_score || 0);
+            
+            charts.drift = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Drift Score',
+                        data: driftScores,
+                        borderColor: '#ff9800',
+                        backgroundColor: 'rgba(255, 152, 0, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Drift Detection Over Time'
+                        },
+                        annotation: {
+                            annotations: {
+                                line1: {
+                                    type: 'line',
+                                    yMin: 0.1,
+                                    yMax: 0.1,
+                                    borderColor: 'rgb(255, 99, 132)',
+                                    borderWidth: 2,
+                                    borderDash: [5, 5],
+                                    label: {
+                                        content: 'Drift Threshold',
+                                        enabled: true
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function updateModelVersions(metrics) {
+            const versionsList = document.getElementById('model-versions-list');
+            
+            // Group by model version
+            const versions = {};
+            metrics.forEach(m => {
+                if (!versions[m.model_version]) {
+                    versions[m.model_version] = [];
+                }
+                versions[m.model_version].push(m);
+            });
+            
+            // Get latest version
+            const latestVersion = Math.max(...Object.keys(versions).map(Number));
+            
+            versionsList.innerHTML = Object.keys(versions).sort((a, b) => b - a).map(version => {
+                const versionMetrics = versions[version];
+                const latestMetric = versionMetrics[versionMetrics.length - 1];
+                const isActive = parseInt(version) === latestVersion;
+                
+                return `
+                    <div class="model-card ${isActive ? 'active' : ''}">
+                        <div class="row align-items-center">
+                            <div class="col-md-2">
+                                <h5 class="mb-0">Version ${version}</h5>
+                                ${isActive ? '<span class="badge bg-success">Active</span>' : ''}
+                            </div>
+                            <div class="col-md-2">
+                                <small class="text-muted">R²</small>
+                                <div><strong>${latestMetric.r_squared ? latestMetric.r_squared.toFixed(4) : 'N/A'}</strong></div>
+                            </div>
+                            <div class="col-md-2">
+                                <small class="text-muted">RMSE</small>
+                                <div><strong>${latestMetric.rmse ? latestMetric.rmse.toFixed(2) : 'N/A'}</strong></div>
+                            </div>
+                            <div class="col-md-2">
+                                <small class="text-muted">Evaluations</small>
+                                <div><strong>${versionMetrics.length}</strong></div>
+                            </div>
+                            <div class="col-md-2">
+                                <small class="text-muted">Last Evaluated</small>
+                                <div>${new Date(latestMetric.evaluation_date).toLocaleDateString()}</div>
+                            </div>
+                            <div class="col-md-2">
+                                <button class="btn btn-sm btn-outline-info" onclick="showVersionDetails(${version})">
+                                    <i class="bi bi-info-circle"></i> Details
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        // ====================================================================
+        // ACTIONS
+        // ====================================================================
+        
+        // Navigate to the appropriate training page based on model type
+        function goToTrainingPage() {
+            const modelType = document.getElementById('model-type').value;
+            const machineId = document.getElementById('machine-select').value;
+            
+            // Map model types to their training pages
+            const pageMap = {
+                'baseline': '/ui/baseline',
+                'anomaly': '/ui/anomaly',
+                'forecast_arima': '/ui/forecast',
+                'forecast_prophet': '/ui/forecast'
+            };
+            
+            const targetPage = pageMap[modelType] || '/ui/baseline';
+            
+            // Build URL with machine pre-selected if possible
+            let url = targetPage;
+            if (machineId) {
+                url += `?machine_id=${machineId}`;
+            }
+            
+            console.log('[goToTrainingPage] Navigating to:', url);
+            window.location.href = url;
+        }
+        
+        // Legacy function - kept for reference but no longer used
+        async function triggerRetrain() {
+            // Redirected to goToTrainingPage - the old mock training is deprecated
+            goToTrainingPage();
+            return;
+            
+            // OLD CODE BELOW - KEPT FOR REFERENCE
+            const modelType = document.getElementById('model-type').value;
+            const machineId = document.getElementById('machine-select').value;
+            
+            console.log('[triggerRetrain] Starting training trigger...');
+            console.log('[triggerRetrain] Model Type:', modelType);
+            console.log('[triggerRetrain] Machine ID:', machineId);
+            
+            if (!confirm('Are you sure you want to trigger model retraining? This may take a few minutes.')) {
+                console.log('[triggerRetrain] User cancelled');
+                return;
+            }
+            
+            // Show loading overlay
+            showLoading('Training Model...', 'Initializing training process. This may take 3-5 minutes.');
+            
+            // Minimum loading time of 2 seconds for better UX
+            const minLoadingTime = new Promise(resolve => setTimeout(resolve, 2000));
+            
+            try {
+                const url = `${API_BASE_URL}/retrain/trigger?model_type=${modelType}&machine_id=${machineId}&trigger_type=manual&reason=User%20initiated%20retraining`;
+                console.log('[triggerRetrain] Fetching:', url);
+                console.log('[triggerRetrain] Full URL:', window.location.origin + url);
+                console.log('[triggerRetrain] Method: POST');
+                
+                const apiCall = fetch(url, {
+                    method: 'POST'
+                });
+                
+                // Wait for both API call and minimum loading time
+                console.log('[triggerRetrain] Waiting for API response...');
+                const [response] = await Promise.all([apiCall, minLoadingTime]);
+                console.log('[triggerRetrain] Response received - Status:', response.status);
+                
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.detail || `API returned ${response.status}: ${response.statusText}`);
+                }
+                
+                const result = await response.json();
+                
+                // Hide loading
+                hideLoading();
+                
+                if (result.triggered) {
+                    const completionTime = result.estimated_completion ? 
+                        new Date(result.estimated_completion).toLocaleTimeString() : 
+                        'Unknown';
+                    showSuccess('Training Started!', `Job ID: ${result.training_job_id}\nEstimated completion: ${completionTime}`);
+                    
+                    // Reload dashboard after a delay
+                    setTimeout(() => {
+                        loadDashboard();
+                    }, 2000);
+                } else {
+                    // Handle "training already in progress" gracefully
+                    if (result.reason && result.reason.includes('already in progress')) {
+                        showError('Training In Progress', 'Another training job is currently running for this model. Please wait for it to complete or check the training history.');
+                    } else {
+                        showError('Cannot Start Training', result.reason || 'Unknown error occurred');
+                    }
+                }
+                
+            } catch (error) {
+                hideLoading();
+                console.error('Error triggering retrain:', error);
+                
+                // More user-friendly error messages
+                let errorMessage = error.message;
+                if (errorMessage.includes('404')) {
+                    errorMessage = 'No model found to retrain. Please train a baseline model first.';
+                } else if (errorMessage.includes('Failed to fetch')) {
+                    errorMessage = 'Could not connect to the API. Please check your connection.';
+                }
+                
+                showError('Training Failed', errorMessage);
+            }
+        }
+        
+        async function resolveAlert(alertId) {
+            // Placeholder for resolving alerts
+            console.log('Resolving alert:', alertId);
+            await loadDashboard();
+        }
+        
+        async function showModelDetails() {
+            const machineId = document.getElementById('machine-select').value;
+            const modelType = document.getElementById('model-type').value;
+            
+            if (!machineId) {
+                alert('Please select a machine first');
+                return;
+            }
+            
+            showLoading('Fetching Model Details...');
+            
+            try {
+                // Get active model ID from summary data
+                const summaryResponse = await fetch(
+                    `/api/analytics/api/v1/model-performance/summary?machine_id=${machineId}&model_type=${modelType}`
+                );
+                const summaryData = await summaryResponse.json();
+                
+                // model_id is at top level of response
+                if (!summaryData.model_id) {
+                    hideLoading();
+                    alert('No active model found for this machine');
+                    return;
+                }
+                
+                const modelId = summaryData.model_id;
+                
+                // Fetch model details
+                const response = await fetch(`/api/analytics/api/v1/baseline/model/${modelId}/details`);
+                const data = await response.json();
+                
+                hideLoading();
+                
+                if (data.success) {
+                    displayModelDetailsModal(data);
+                } else {
+                    alert('Failed to fetch model details');
+                }
+            } catch (error) {
+                hideLoading();
+                console.error('Error fetching model details:', error);
+                alert('Error fetching model details: ' + error.message);
+            }
+        }
+        
+        async function showVersionDetails(version) {
+            const machineId = document.getElementById('machine-select').value;
+            
+            if (!machineId) {
+                alert('Please select a machine first');
+                return;
+            }
+            
+            showLoading('Fetching Version Details...');
+            
+            try {
+                // Find model ID for this version from summary data
+                const modelType = document.getElementById('model-type').value;
+                const summaryResponse = await fetch(
+                    `/api/analytics/api/v1/model-performance/summary?machine_id=${machineId}&model_type=${modelType}`
+                );
+                const summaryData = await summaryResponse.json();
+                
+                // Find the version in versions array
+                const versionData = summaryData.versions?.find(v => v.version === version);
+                if (!versionData) {
+                    hideLoading();
+                    alert('No model found for this version');
+                    return;
+                }
+                
+                const modelId = versionData.id;
+                
+                // Fetch model details
+                const response = await fetch(`/api/analytics/api/v1/baseline/model/${modelId}/details`);
+                const data = await response.json();
+                
+                hideLoading();
+                
+                if (data.success && data.model_version === version) {
+                    displayModelDetailsModal(data);
+                } else if (data.success) {
+                    // If versions don't match, show what we have
+                    displayModelDetailsModal(data);
+                    console.warn(`Requested version ${version}, but got version ${data.model_version}`);
+                } else {
+                    alert('Failed to fetch version details');
+                }
+            } catch (error) {
+                hideLoading();
+                console.error('Error fetching version details:', error);
+                alert('Error fetching version details: ' + error.message);
+            }
+        }
+        
+        function displayModelDetailsModal(data) {
+            const modalHtml = `
+                <div class="modal fade" id="modelDetailsModal" tabindex="-1">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">
+                                    <i class="bi bi-info-circle"></i> Model Details - ${data.machine_name}
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <!-- Model Info -->
+                                <div class="card mb-3">
+                                    <div class="card-header bg-primary text-white">
+                                        <strong>Model Information</strong>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <p><strong>Version:</strong> ${data.model_version}</p>
+                                                <p><strong>Status:</strong> <span class="badge ${data.is_active ? 'bg-success' : 'bg-secondary'}">${data.is_active ? 'Active' : 'Inactive'}</span></p>
+                                                <p><strong>Trained:</strong> ${new Date(data.trained_at).toLocaleString()}</p>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <p><strong>Energy Source:</strong> ${data.energy_source.name}</p>
+                                                <p><strong>Unit:</strong> ${data.energy_source.unit}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Training Period -->
+                                <div class="card mb-3">
+                                    <div class="card-header bg-info text-white">
+                                        <strong>Training Period</strong>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <p><strong>Start:</strong> ${new Date(data.training_period.start).toLocaleDateString()}</p>
+                                                <p><strong>End:</strong> ${new Date(data.training_period.end).toLocaleDateString()}</p>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <p><strong>Duration:</strong> ${data.training_period.days} days</p>
+                                                <p><strong>Samples:</strong> ${data.training_period.samples.toLocaleString()} (${data.training_period.samples_per_day}/day)</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Performance Metrics -->
+                                <div class="card mb-3">
+                                    <div class="card-header bg-success text-white">
+                                        <strong>Performance Metrics</strong>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <p><strong>R²:</strong> ${data.metrics.r_squared}</p>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <p><strong>Accuracy:</strong> ${data.metrics.accuracy_percent}%</p>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <p><strong>RMSE:</strong> ${data.metrics.rmse}</p>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <p><strong>MAE:</strong> ${data.metrics.mae}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Features/Drivers -->
+                                <div class="card mb-3">
+                                    <div class="card-header bg-warning text-dark">
+                                        <strong>Features/Drivers Used (${data.features.count})</strong>
+                                    </div>
+                                    <div class="card-body">
+                                        <table class="table table-sm table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>Feature</th>
+                                                    <th>Coefficient</th>
+                                                    <th>Impact</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                ${data.features.details.map(f => `
+                                                    <tr>
+                                                        <td>${f.name}</td>
+                                                        <td>${f.coefficient}</td>
+                                                        <td>
+                                                            <span class="badge ${f.impact === 'positive' ? 'bg-success' : f.impact === 'negative' ? 'bg-danger' : 'bg-secondary'}">
+                                                                ${f.impact === 'positive' ? '↑' : f.impact === 'negative' ? '↓' : '→'} ${f.impact}
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                `).join('')}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                
+                                <!-- Formula -->
+                                <div class="card">
+                                    <div class="card-header bg-dark text-white">
+                                        <strong>Model Formula</strong>
+                                    </div>
+                                    <div class="card-body">
+                                        <p><strong>Intercept:</strong> ${data.formula.intercept}</p>
+                                        <p><strong>Equation:</strong></p>
+                                        <pre class="bg-light p-3 rounded" style="overflow-x: auto;">${data.formula.equation}</pre>
+                                        <p class="text-muted"><em>${data.formula.readable}</em></p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Remove existing modal if any
+            const existingModal = document.getElementById('modelDetailsModal');
+            if (existingModal) {
+                existingModal.remove();
+            }
+            
+            // Add modal to body
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            
+            // Show modal
+            const modal = new bootstrap.Modal(document.getElementById('modelDetailsModal'));
+            modal.show();
+            
+            // Clean up on close
+            document.getElementById('modelDetailsModal').addEventListener('hidden.bs.modal', function() {
+                this.remove();
+            });
+        }
+        
+        // ====================================================================
+        // UI HELPERS - Loading & Error Display
+        // ====================================================================
+        
+        function showLoading(title = 'Processing...', subtitle = 'Please wait...') {
+            const overlay = document.getElementById('loading-overlay');
+            const titleEl = document.getElementById('loading-text');
+            const subtitleEl = document.getElementById('loading-subtext');
+            
+            titleEl.textContent = title;
+            subtitleEl.textContent = subtitle;
+            overlay.classList.add('active');
+            
+            // Prevent body scroll
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function hideLoading() {
+            const overlay = document.getElementById('loading-overlay');
+            overlay.classList.remove('active');
+            
+            // Restore body scroll
+            document.body.style.overflow = '';
+        }
+        
+        function showError(title, message) {
+            const toast = document.getElementById('error-toast');
+            const titleEl = document.getElementById('error-title');
+            const messageEl = document.getElementById('error-message');
+            
+            titleEl.textContent = title;
+            messageEl.textContent = message;
+            toast.classList.add('active');
+            
+            // Auto-hide after 8 seconds
+            setTimeout(() => {
+                closeErrorToast();
+            }, 8000);
+        }
+        
+        function showSuccess(title, message) {
+            // Create success toast dynamically
+            const existingToast = document.getElementById('success-toast');
+            if (existingToast) {
+                existingToast.remove();
+            }
+            
+            const toast = document.createElement('div');
+            toast.id = 'success-toast';
+            toast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: linear-gradient(135deg, #43e97b, #38f9d7);
+                color: white;
+                padding: 1.5rem;
+                border-radius: 12px;
+                box-shadow: 0 10px 40px rgba(67, 233, 123, 0.4);
+                z-index: 10000;
+                min-width: 350px;
+                max-width: 500px;
+                animation: slideInRight 0.3s ease-out;
+            `;
+            
+            toast.innerHTML = `
+                <button onclick="this.parentElement.remove()" style="
+                    position: absolute;
+                    top: 10px;
+                    right: 10px;
+                    background: rgba(255, 255, 255, 0.2);
+                    border: none;
+                    color: white;
+                    width: 24px;
+                    height: 24px;
+                    border-radius: 50%;
+                    cursor: pointer;
+                    font-size: 1rem;
+                    line-height: 1;
+                ">×</button>
+                <div style="display: flex; align-items: center; margin-bottom: 0.5rem;">
+                    <span style="font-size: 1.5rem; margin-right: 0.75rem;">✓</span>
+                    <span style="font-weight: 600; font-size: 1.1rem;">${title}</span>
+                </div>
+                <div style="font-size: 0.95rem; opacity: 0.95; line-height: 1.5; white-space: pre-line;">${message}</div>
+            `;
+            
+            document.body.appendChild(toast);
+            
+            // Auto-hide after 8 seconds
+            setTimeout(() => {
+                toast.remove();
+            }, 8000);
+        }
+        
+        function closeErrorToast() {
+            const toast = document.getElementById('error-toast');
+            toast.classList.remove('active');
+        }
+    </script>
+    
+    <!-- EnMS Chatbot Widget (Rasa) -->
+    <script src="/js/chatbot-widget.js"></script>
+    
+    <!-- OVOS Voice Assistant Widget -->
+    <script src="/js/ovos-voice-widget.js?v=20260420a"></script>
+    
+    <!-- Sidebar Script -->
+    <script src="/js/sidebar.js?v=1765871462"></script>
+</body>
+</html>

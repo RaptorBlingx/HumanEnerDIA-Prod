@@ -1,0 +1,53 @@
+<!-- Report Header Component -->
+<header class="report-header no-break" style="margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 2px solid var(--color-teal);">
+    <div class="flex items-start justify-between">
+        <!-- Logo Section -->
+        <div class="logo-container" style="flex: 0 0 auto; margin-right: 2rem;">
+            <img src="file://{{ logo_path | default('static/images/logo.png') }}" 
+                 alt="{{ company_name | default('EnMS') }} Logo" 
+                 style="height: 60px; width: auto;">
+        </div>
+        
+        <!-- Report Info Section -->
+        <div class="header-info" style="flex: 1 1 auto;">
+            <h1 class="report-title" style="font-size: var(--font-display); font-weight: 700; color: var(--color-navy); margin: 0 0 0.5rem 0;">
+                {{ report_title | default('Energy Management Report') }}
+            </h1>
+            
+            <div class="report-meta" style="display: flex; flex-wrap: wrap; gap: 1.5rem; font-size: var(--font-body); color: var(--color-gray-medium);">
+                {% if report_period %}
+                <div class="meta-item">
+                    <span class="meta-label" style="font-weight: 600; color: var(--color-navy);">Period:</span>
+                    <span class="meta-value">{{ report_period }}</span>
+                </div>
+                {% endif %}
+                
+                {% if facility_name %}
+                <div class="meta-item">
+                    <span class="meta-label" style="font-weight: 600; color: var(--color-navy);">Facility:</span>
+                    <span class="meta-value">{{ facility_name }}</span>
+                </div>
+                {% endif %}
+                
+                {% if report_type %}
+                <div class="meta-item">
+                    <span class="meta-label" style="font-weight: 600; color: var(--color-navy);">Type:</span>
+                    <span class="meta-value">{{ report_type }}</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Status Badge (if applicable) -->
+        {% if report_status %}
+        <div class="status-badge" style="flex: 0 0 auto; margin-left: 1rem;">
+            <span class="badge badge-{{ report_status | lower }}">
+                {{ report_status | upper }}
+            </span>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- Optional: Additional header content -->
+    {% block header_extra %}{% endblock %}
+</header>

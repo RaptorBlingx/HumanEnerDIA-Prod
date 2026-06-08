@@ -1,0 +1,5 @@
+{
+  "name": "Gemini Flash Chat",
+  "description": "A high-performance, responsive chatbot interface powered by Google's Gemini 2.5 Flash model. Features real-time streaming, markdown support, and image analysis capabilities.",
+  "requestFramePermissions": []
+}

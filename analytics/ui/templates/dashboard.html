@@ -1,0 +1,664 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics Dashboard - EnMS{% endblock %}
+
+{% block content %}
+<!-- Page Header with Breadcrumb -->
+<div style="margin-bottom: var(--space-8);">
+    <div style="display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-3); font-size: var(--text-sm); color: var(--text-secondary);">
+        <a href="/" style="color: var(--text-secondary); text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='var(--color-primary)'" onmouseout="this.style.color='var(--text-secondary)'">Home</a>
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+        <span style="color: var(--color-text-primary); font-weight: var(--font-medium);">Analytics Dashboard</span>
+    </div>
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <h1 style="font-size: var(--text-4xl); font-weight: var(--font-bold); color: var(--color-text-primary); margin-bottom: var(--space-2); letter-spacing: -0.02em;">Analytics Dashboard</h1>
+            <p style="color: var(--text-secondary); font-size: var(--text-lg);">ML-powered insights for industrial energy management</p>
+        </div>
+        <div style="display: flex; align-items: center; gap: var(--space-3);">
+            <div style="text-align: right;">
+                <div style="font-size: var(--text-xs); color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">Last Updated</div>
+                <div style="font-size: var(--text-sm); font-weight: var(--font-semibold); color: var(--color-text-primary);" id="last-updated-time">Just now</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Service Status Cards -->
+<div class="grid grid-cols-4" style="margin-bottom: var(--space-8); gap: var(--space-4);">
+    <div class="industrial-card" style="background: linear-gradient(135deg, rgba(10, 36, 99, 0.03) 0%, rgba(10, 36, 99, 0.08) 100%);">
+        <div class="stat-card">
+            <div style="display: flex; align-items: center; justify-content: center; width: 48px; height: 48px; background: var(--color-primary); border-radius: var(--radius-lg); margin: 0 auto var(--space-3);">
+                <svg width="24" height="24" fill="white" viewBox="0 0 16 16">
+                    <path d="M6 1h4a1 1 0 0 1 1 1v3.5a.5.5 0 0 1-1 0V2H6v2.5a.5.5 0 0 1-1 0V2a1 1 0 0 1 1-1zm0 14h4a1 1 0 0 0 1-1v-3.5a.5.5 0 0 0-1 0V14H6v-2.5a.5.5 0 0 0-1 0V14a1 1 0 0 0 1 1zM2 6h2.5a.5.5 0 0 1 0 1H2v4h2.5a.5.5 0 0 1 0 1H2a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1zm12 0h-2.5a.5.5 0 0 0 0 1H14v4h-2.5a.5.5 0 0 0 0 1H14a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1z"/>
+                    <path d="M8.5 2.5a.5.5 0 0 0-1 0v11a.5.5 0 0 0 1 0v-11z"/>
+                </svg>
+            </div>
+            <div class="stat-card-value" style="color: var(--color-primary);" id="active-machines-count">-</div>
+            <div class="stat-card-label">Active Machines</div>
+        </div>
+    </div>
+    <div class="industrial-card" style="background: linear-gradient(135deg, rgba(0, 168, 232, 0.03) 0%, rgba(0, 168, 232, 0.08) 100%);">
+        <div class="stat-card">
+            <div style="display: flex; align-items: center; justify-content: center; width: 48px; height: 48px; background: var(--color-secondary); border-radius: var(--radius-lg); margin: 0 auto var(--space-3);">
+                <svg width="24" height="24" fill="white" viewBox="0 0 16 16">
+                    <path d="M0 0h1v15h15v1H0V0Zm10 3.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-1 0V4.9l-3.613 4.417a.5.5 0 0 1-.74.037L7.06 6.767l-3.656 5.027a.5.5 0 0 1-.808-.588l4-5.5a.5.5 0 0 1 .758-.06l2.609 2.61L13.445 4H10.5a.5.5 0 0 1-.5-.5Z"/>
+                </svg>
+            </div>
+            <div class="stat-card-value" style="color: var(--color-secondary);" id="baseline-models-count">-</div>
+            <div class="stat-card-label">Baseline Models</div>
+        </div>
+    </div>
+    <div class="industrial-card" style="background: linear-gradient(135deg, rgba(255, 107, 53, 0.03) 0%, rgba(255, 107, 53, 0.08) 100%);">
+        <div class="stat-card">
+            <div style="display: flex; align-items: center; justify-content: center; width: 48px; height: 48px; background: var(--color-accent); border-radius: var(--radius-lg); margin: 0 auto var(--space-3);">
+                <svg width="24" height="24" fill="white" viewBox="0 0 16 16">
+                    <path d="M7.938 2.016A.13.13 0 0 1 8.002 2a.13.13 0 0 1 .063.016.146.146 0 0 1 .054.057l6.857 11.667c.036.06.035.124.002.183a.163.163 0 0 1-.054.06.116.116 0 0 1-.066.017H1.146a.115.115 0 0 1-.066-.017.163.163 0 0 1-.054-.06.176.176 0 0 1 .002-.183L7.884 2.073a.147.147 0 0 1 .054-.057zm1.044-.45a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566z"/>
+                    <path d="M7.002 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 5.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995z"/>
+                </svg>
+            </div>
+            <div class="stat-card-value" style="color: var(--color-accent);" id="anomalies-24h-count">-</div>
+            <div class="stat-card-label">Anomalies (24h)</div>
+        </div>
+    </div>
+    <div class="industrial-card" style="background: linear-gradient(135deg, rgba(46, 204, 113, 0.03) 0%, rgba(46, 204, 113, 0.08) 100%);">
+        <div class="stat-card">
+            <div style="display: flex; align-items: center; justify-content: center; width: 48px; height: 48px; background: var(--color-success); border-radius: var(--radius-lg); margin: 0 auto var(--space-3);">
+                <svg width="24" height="24" fill="white" viewBox="0 0 16 16">
+                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                    <path d="M10.97 4.97a.235.235 0 0 0-.02.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-1.071-1.05z"/>
+                </svg>
+            </div>
+            <div class="stat-card-value" style="color: var(--color-success);" id="scheduler-status">-</div>
+            <div class="stat-card-label">Scheduler Status</div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Anomalies -->
+<div style="margin-bottom: var(--space-8);">
+    <div class="industrial-card">
+        <div class="industrial-card-header" style="border-bottom: 1px solid var(--color-border);">
+            <h5 style="margin: 0; font-size: var(--text-xl); font-weight: var(--font-semibold); color: var(--color-text-primary);">Recent Anomalies</h5>
+        </div>
+        <div class="industrial-card-body">
+            <div id="recent-anomalies-container">
+                <div class="loading-spinner active">
+                    <div style="text-align: center; padding: var(--space-8); color: var(--text-secondary);">
+                        Loading...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div style="margin-bottom: var(--space-8);">
+    <div class="industrial-card" style="border: 1px solid var(--color-border); box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+        <div class="industrial-card-header" style="border-bottom: 1px solid var(--color-border); padding: var(--space-5) var(--space-6);">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h3 class="industrial-card-title" style="margin: 0; font-size: var(--text-xl); font-weight: var(--font-semibold);">Quick Actions</h3>
+                <span style="font-size: var(--text-xs); color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em;">Frequently Used</span>
+            </div>
+        </div>
+        <div class="industrial-card-body" style="padding: var(--space-6);">
+            <div class="grid grid-cols-4" style="gap: var(--space-5);">
+                <!-- Train Baseline Model -->
+                <a href="/api/analytics/ui/baseline" class="btn btn-primary btn-block" style="text-decoration: none; padding: var(--space-6); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; min-height: 140px; gap: var(--space-3); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); border-radius: var(--radius-lg); position: relative; overflow: hidden;"
+                     onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 12px 24px rgba(10, 36, 99, 0.2)'"
+                     onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow=''">
+                    <div style="position: absolute; top: 0; right: 0; width: 100px; height: 100px; background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%); border-radius: 50%; transform: translate(30%, -30%);"></div>
+                    <svg width="36" height="36" fill="currentColor" viewBox="0 0 16 16" style="position: relative; z-index: 1;">
+                        <path d="M0 0h1v15h15v1H0V0Zm10 3.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-1 0V4.9l-3.613 4.417a.5.5 0 0 1-.74.037L7.06 6.767l-3.656 5.027a.5.5 0 0 1-.808-.588l4-5.5a.5.5 0 0 1 .758-.06l2.609 2.61L13.445 4H10.5a.5.5 0 0 1-.5-.5Z"/>
+                    </svg>
+                    <span style="font-weight: var(--font-semibold); font-size: var(--text-base); position: relative; z-index: 1;">Train Baseline Model</span>
+                    <span style="font-size: var(--text-xs); opacity: 0.9; position: relative; z-index: 1;">ML Model Training</span>
+                </a>
+                
+                <!-- Detect Anomalies -->
+                <a href="/api/analytics/ui/anomaly" class="btn btn-secondary btn-block" style="text-decoration: none; padding: var(--space-6); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; min-height: 140px; gap: var(--space-3); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); border-radius: var(--radius-lg); position: relative; overflow: hidden;"
+                     onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 12px 24px rgba(0, 168, 232, 0.2)'"
+                     onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow=''">
+                    <div style="position: absolute; top: 0; right: 0; width: 100px; height: 100px; background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%); border-radius: 50%; transform: translate(30%, -30%);"></div>
+                    <svg width="36" height="36" fill="currentColor" viewBox="0 0 16 16" style="position: relative; z-index: 1;">
+                        <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+                    </svg>
+                    <span style="font-weight: var(--font-semibold); font-size: var(--text-base); position: relative; z-index: 1;">Detect Anomalies</span>
+                    <span style="font-size: var(--text-xs); opacity: 0.9; position: relative; z-index: 1;">AI-Powered Detection</span>
+                </a>
+                
+                <!-- View KPIs -->
+                <a href="/api/analytics/ui/kpi" class="btn btn-accent btn-block" style="text-decoration: none; padding: var(--space-6); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; min-height: 140px; gap: var(--space-3); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); border-radius: var(--radius-lg); position: relative; overflow: hidden;"
+                     onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 12px 24px rgba(255, 107, 53, 0.2)'"
+                     onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow=''">
+                    <div style="position: absolute; top: 0; right: 0; width: 100px; height: 100px; background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%); border-radius: 50%; transform: translate(30%, -30%);"></div>
+                    <svg width="36" height="36" fill="currentColor" viewBox="0 0 16 16" style="position: relative; z-index: 1;">
+                        <path d="M4 11H2v3h2v-3zm5-4H7v7h2V7zm5-5v12h-2V2h2zm-2-1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1h-2zM6 7a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7zm-5 4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1v-3z"/>
+                    </svg>
+                    <span style="font-weight: var(--font-semibold); font-size: var(--text-base); position: relative; z-index: 1;">View KPIs</span>
+                    <span style="font-size: var(--text-xs); opacity: 0.9; position: relative; z-index: 1;">Performance Metrics</span>
+                </a>
+                
+                <!-- API Documentation -->
+                <a href="/api/analytics/docs" target="_blank" class="btn btn-outline-primary btn-block" style="text-decoration: none; padding: var(--space-6); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; min-height: 140px; gap: var(--space-3); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); border-radius: var(--radius-lg); position: relative; overflow: hidden; background: linear-gradient(135deg, rgba(10, 36, 99, 0.02) 0%, rgba(10, 36, 99, 0.05) 100%);"
+                     onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 20px rgba(10, 36, 99, 0.15)'"
+                     onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow=''">
+                    <svg width="36" height="36" fill="currentColor" viewBox="0 0 16 16" style="position: relative; z-index: 1;">
+                        <path d="M5 4a.5.5 0 0 0 0 1h6a.5.5 0 0 0 0-1H5zm-.5 2.5A.5.5 0 0 1 5 6h6a.5.5 0 0 1 0 1H5a.5.5 0 0 1-.5-.5zM5 8a.5.5 0 0 0 0 1h6a.5.5 0 0 0 0-1H5zm0 2a.5.5 0 0 0 0 1h3a.5.5 0 0 0 0-1H5z"/>
+                        <path d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2zm10-1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1z"/>
+                    </svg>
+                    <span style="font-weight: var(--font-semibold); font-size: var(--text-base); position: relative; z-index: 1;">API Documentation</span>
+                    <span style="font-size: var(--text-xs); opacity: 0.7; position: relative; z-index: 1;">Developer Resources</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- System Information -->
+<div class="grid grid-cols-2" style="gap: var(--space-6); margin-bottom: var(--space-8);">
+    <div class="industrial-card" style="border: 1px solid var(--color-border); box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+        <div class="industrial-card-header" style="border-bottom: 1px solid var(--color-border); padding: var(--space-5) var(--space-6);">
+            <h3 class="industrial-card-title" style="margin: 0; font-size: var(--text-lg); font-weight: var(--font-semibold); display: flex; align-items: center; gap: var(--space-2);">
+                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="16" x2="12" y2="12"></line>
+                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                </svg>
+                Service Information
+            </h3>
+        </div>
+        <div class="industrial-card-body" style="padding: 0;">
+            <div id="service-info">
+                <div style="text-align: center; padding: var(--space-12); color: var(--text-secondary);">
+                    <div style="width: 48px; height: 48px; margin: 0 auto var(--space-4); border-radius: 12px; background: linear-gradient(135deg, rgba(10, 36, 99, 0.1) 0%, rgba(10, 36, 99, 0.2) 100%); display: flex; align-items: center; justify-content: center;">
+                        <div class="spinner" style="width: 24px; height: 24px;"></div>
+                    </div>
+                    <div style="font-size: var(--text-base); font-weight: var(--font-medium);">Loading service details...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="industrial-card" style="border: 1px solid var(--color-border); box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+        <div class="industrial-card-header" style="border-bottom: 1px solid var(--color-border); padding: var(--space-5) var(--space-6);">
+            <h3 class="industrial-card-title" style="margin: 0; font-size: var(--text-lg); font-weight: var(--font-semibold); display: flex; align-items: center; gap: var(--space-2);">
+                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                    <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+                    <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
+                    <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
+                </svg>
+                Database Health
+            </h3>
+        </div>
+        <div class="industrial-card-body" style="padding: 0;">
+            <div id="db-health">
+                <div style="text-align: center; padding: var(--space-12); color: var(--text-secondary);">
+                    <div style="width: 48px; height: 48px; margin: 0 auto var(--space-4); border-radius: 12px; background: linear-gradient(135deg, rgba(0, 168, 232, 0.1) 0%, rgba(0, 168, 232, 0.2) 100%); display: flex; align-items: center; justify-content: center;">
+                        <div class="spinner" style="width: 24px; height: 24px;"></div>
+                    </div>
+                    <div style="font-size: var(--text-base); font-weight: var(--font-medium);">Loading database status...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- WebSocket Connection Status Indicator -->
+<div class="ws-status-indicator" id="ws-status-indicator" title="WebSocket Status">
+    <div class="ws-status-dot status-connecting" id="ws-status-dot"></div>
+    <span class="ws-status-text status-connecting" id="ws-status-text">Connecting...</span>
+</div>
+
+<!-- Toast Notification Container -->
+<div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1050; margin-top: 60px;">
+    <div id="toast-template" class="toast align-items-center" role="alert" aria-live="assertive" aria-atomic="true" style="display: none;">
+        <div class="d-flex">
+            <div class="toast-body">
+                <!-- Toast content will be inserted here -->
+            </div>
+            <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- WebSocket Client -->
+<script src="/api/analytics/ui/static/js/websocket-client.js?v=20251016"></script>
+
+<script>
+    // WebSocket Manager Instance
+    let wsManager = null;
+    let dashboardWS = null;
+    let anomaliesWS = null;
+    
+    // Toast Notification System
+    function showToast(message, type = 'info', duration = 5000) {
+        const container = document.querySelector('.toast-container');
+        const toastEl = document.createElement('div');
+        toastEl.className = `toast align-items-center text-bg-${type} border-0`;
+        toastEl.setAttribute('role', 'alert');
+        toastEl.setAttribute('aria-live', 'assertive');
+        toastEl.setAttribute('aria-atomic', 'true');
+        
+        toastEl.innerHTML = `
+            <div class="d-flex">
+                <div class="toast-body">
+                    ${message}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        `;
+        
+        container.appendChild(toastEl);
+        const toast = new bootstrap.Toast(toastEl, { delay: duration });
+        toast.show();
+        
+        // Remove from DOM after hiding
+        toastEl.addEventListener('hidden.bs.toast', () => {
+            toastEl.remove();
+        });
+    }
+    
+    // Update WebSocket Connection Status Indicator
+    function updateWSStatus(state) {
+        const dot = document.getElementById('ws-status-dot');
+        const textEl = document.getElementById('ws-status-text');
+        
+        const statusConfig = {
+            'connected': { text: 'Live', title: 'Real-time updates active' },
+            'connecting': { text: 'Connecting...', title: 'Connecting to server...' },
+            'reconnecting': { text: 'Reconnecting...', title: 'Attempting to reconnect...' },
+            'disconnected': { text: 'Offline', title: 'No real-time updates' }
+        };
+        
+        const config = statusConfig[state] || statusConfig['disconnected'];
+        
+        // Update dot status class
+        dot.className = `ws-status-dot status-${state}`;
+        
+        // Update text status class
+        textEl.className = `ws-status-text status-${state}`;
+        textEl.textContent = config.text;
+        
+        // Update title
+        document.getElementById('ws-status-indicator').title = config.title;
+    }
+    
+    // Initialize WebSocket Connections
+    function initWebSockets() {
+        console.log('[Dashboard] Initializing WebSocket connections...');
+        
+        wsManager = new WebSocketManager();
+        
+        // Connect to Dashboard WebSocket
+        dashboardWS = wsManager.connectDashboard(
+            // onMessage
+            (data) => handleDashboardMessage(data),
+            // onConnect
+            () => {
+                console.log('[Dashboard] Dashboard WebSocket connected');
+                updateWSStatus('connected');
+                // Status indicator shows connection state - no toast needed
+            },
+            // onDisconnect
+            () => {
+                console.log('[Dashboard] Dashboard WebSocket disconnected');
+                updateWSStatus('disconnected');
+            }
+        );
+        
+        // Connect to Anomalies WebSocket
+        anomaliesWS = wsManager.connectAnomalies(
+            // onMessage
+            (data) => handleAnomalyMessage(data),
+            // onConnect
+            () => {
+                console.log('[Dashboard] Anomalies WebSocket connected');
+            },
+            // onDisconnect
+            () => {
+                console.log('[Dashboard] Anomalies WebSocket disconnected');
+            }
+        );
+        
+        // Check connection status periodically
+        setInterval(() => {
+            const state = dashboardWS.getConnectionState();
+            updateWSStatus(state);
+        }, 5000);
+    }
+    
+    // Handle Dashboard WebSocket Messages
+    function handleDashboardMessage(data) {
+        console.log('[Dashboard] Received message:', data);
+        
+        switch(data.event_type) {
+            case 'metric_updated':
+                handleMetricUpdate(data.payload);
+                break;
+            case 'model_updated':
+                handleModelUpdate(data.payload);
+                showToast(`Model updated: ${data.payload.model_type} v${data.payload.version}`, 'info');
+                break;
+            case 'training_completed':
+                handleTrainingComplete(data.payload);
+                break;
+            default:
+                console.log('[Dashboard] Unknown event type:', data.event_type);
+        }
+    }
+    
+    // Handle Anomaly WebSocket Messages
+    function handleAnomalyMessage(data) {
+        console.log('[Dashboard] Received anomaly:', data);
+        
+        if (data.event_type === 'anomaly_detected') {
+            handleNewAnomaly(data.payload);
+        }
+    }
+    
+    // Handle New Anomaly Event
+    function handleNewAnomaly(anomaly) {
+        console.log('[Dashboard] New anomaly detected:', anomaly);
+        
+        // Show toast notification with severity-based styling
+        const severity = anomaly.severity || 'warning';
+        const toastType = severity === 'critical' ? 'danger' : 'warning';
+        const icon = severity === 'critical' ? '🚨' : '⚠️';
+        
+        showToast(
+            `${icon} <strong>Anomaly Detected</strong><br/>` +
+            `Machine: ${anomaly.machine_name || anomaly.machine_id}<br/>` +
+            `Type: ${anomaly.anomaly_type || 'Energy Deviation'}<br/>` +
+            `Severity: ${severity.toUpperCase()}`,
+            toastType,
+            8000
+        );
+        
+        // Increment anomaly counter
+        const counterEl = document.getElementById('anomalies-24h-count');
+        if (counterEl && counterEl.textContent !== '-') {
+            const currentCount = parseInt(counterEl.textContent) || 0;
+            counterEl.textContent = currentCount + 1;
+            
+            // Animate the counter
+            counterEl.style.transform = 'scale(1.2)';
+            counterEl.style.color = 'var(--danger-color)';
+            setTimeout(() => {
+                counterEl.style.transform = 'scale(1)';
+                counterEl.style.color = '';
+            }, 500);
+        }
+        
+        // Reload recent anomalies to show the new one
+        loadRecentAnomalies();
+    }
+    
+    // Handle Metric Update Event
+    function handleMetricUpdate(data) {
+        console.log('[Dashboard] Metric updated:', data);
+        // Future: Update specific metric displays in real-time
+    }
+    
+    // Handle Model Update Event
+    function handleModelUpdate(data) {
+        console.log('[Dashboard] Model updated:', data);
+        // Reload baseline models count
+        loadDashboard();
+    }
+    
+    // Handle Training Complete Event
+    function handleTrainingComplete(data) {
+        console.log('[Dashboard] Training completed:', data);
+        
+        if (data.status === 'completed') {
+            showToast(
+                `✓ <strong>Training Complete</strong><br/>` +
+                `Job ID: ${data.job_id}<br/>` +
+                `Performance: ${data.metrics?.r_squared ? (data.metrics.r_squared * 100).toFixed(1) + '%' : 'N/A'}`,
+                'success',
+                6000
+            );
+        } else if (data.status === 'failed') {
+            showToast(
+                `✗ <strong>Training Failed</strong><br/>` +
+                `Job ID: ${data.job_id}<br/>` +
+                `Error: ${data.error_message || 'Unknown error'}`,
+                'danger',
+                8000
+            );
+        }
+        
+        // Reload dashboard stats
+        loadDashboard();
+    }
+    
+    // Load dashboard data
+    async function loadDashboard() {
+        try {
+            // Load service health
+            const healthResponse = await axios.get(`${API_BASE}/health`);
+            displayServiceInfo(healthResponse.data);
+            
+            // Load recent anomalies (24-hour window)
+            const endTime = new Date();
+            const startTime = new Date(endTime.getTime() - (24 * 60 * 60 * 1000));
+            const anomaliesResponse = await axios.get(`${API_BASE}/anomaly/recent`, {
+                params: {
+                    start_time: startTime.toISOString(),
+                    end_time: endTime.toISOString(),
+                    limit: 100
+                }
+            });
+            
+            // Fix: API returns {anomalies: [...], total_count: N}
+            const anomaliesData = anomaliesResponse.data.anomalies || [];
+            displayRecentAnomalies(anomaliesData);
+            
+            // Update stats with total count from API
+            document.getElementById('anomalies-24h-count').textContent = anomaliesResponse.data.total_count || anomaliesData.length;
+            
+            // Load active machines count
+            try {
+                const machinesResponse = await axios.get(`${API_BASE}/machines`, {
+                    params: { is_active: true }
+                });
+                const machines = machinesResponse.data || [];
+                console.log('[Dashboard] Active machines loaded:', machines.length, machines);
+                document.getElementById('active-machines-count').textContent = machines.length;
+                
+                // Count baseline models across all machines
+                let totalModels = 0;
+                for (const machine of machines) {
+                    try {
+                        const modelResponse = await axios.get(`${API_BASE}/baseline/models`, {
+                            params: { machine_id: machine.id }
+                        });
+                        const machineModels = modelResponse.data.total_models || 0;
+                        console.log(`[Dashboard] ${machine.name}: ${machineModels} models`);
+                        totalModels += machineModels;
+                    } catch (e) {
+                        // Machine has no models, skip
+                        console.log(`[Dashboard] ${machine.name}: no models (error: ${e.message})`);
+                    }
+                }
+                console.log('[Dashboard] Total baseline models:', totalModels);
+                document.getElementById('baseline-models-count').textContent = totalModels;
+                
+            } catch (e) {
+                console.error('Error loading counts:', e);
+                document.getElementById('active-machines-count').textContent = '?';
+                document.getElementById('baseline-models-count').textContent = '?';
+            }
+            
+        } catch (error) {
+            console.error('Error loading dashboard:', error);
+            // Show error state
+            document.getElementById('recent-anomalies-container').innerHTML = 
+                '<div class="alert alert-danger">Failed to load dashboard data. Please refresh the page.</div>';
+        }
+    }
+    
+    function displayServiceInfo(data) {
+        const container = document.getElementById('service-info');
+        const dbContainer = document.getElementById('db-health');
+        
+        container.innerHTML = `
+            <table class="industrial-table">
+                <tbody>
+                    <tr>
+                        <td style="font-weight: var(--font-semibold); color: var(--color-gray-700); width: 40%;">Service</td>
+                        <td>${data.service || 'EnMS Analytics'}</td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight: var(--font-semibold); color: var(--color-gray-700);">Version</td>
+                        <td><span class="badge badge-light">${data.version || 'N/A'}</span></td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight: var(--font-semibold); color: var(--color-gray-700);">Status</td>
+                        <td><span class="badge badge-success">${data.status}</span></td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight: var(--font-semibold); color: var(--color-gray-700);">Uptime</td>
+                        <td>${data.uptime || 'N/A'}</td>
+                    </tr>
+                </tbody>
+            </table>
+        `;
+        
+        dbContainer.innerHTML = `
+            <table class="industrial-table">
+                <tbody>
+                    <tr>
+                        <td style="font-weight: var(--font-semibold); color: var(--color-gray-700); width: 40%;">Database</td>
+                        <td><code style="font-family: var(--font-mono); font-size: var(--text-sm); background: var(--color-gray-100); padding: 2px 6px; border-radius: var(--radius);">${data.database?.name || 'enms'}</code></td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight: var(--font-semibold); color: var(--color-gray-700);">Status</td>
+                        <td><span class="badge ${data.database?.status === 'connected' ? 'badge-success' : 'badge-danger'}">${data.database?.status || 'unknown'}</span></td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight: var(--font-semibold); color: var(--color-gray-700);">Pool Size</td>
+                        <td style="font-weight: var(--font-medium);">${data.database?.pool_size || 'N/A'}</td>
+                    </tr>
+                </tbody>
+            </table>
+        `;
+        
+        // Update stats - check both enabled AND running
+        const schedulerEnabled = data.scheduler?.enabled && data.scheduler?.running;
+        document.getElementById('scheduler-status').innerHTML = schedulerEnabled ? 
+            '<span class="badge badge-success" style="font-size: var(--text-sm); padding: var(--space-2) var(--space-4);">Active</span>' : 
+            '<span class="badge badge-neutral" style="font-size: var(--text-sm); padding: var(--space-2) var(--space-4);">Disabled</span>';
+    }
+    
+    function displayRecentAnomalies(anomalies) {
+        const container = document.getElementById('recent-anomalies-container');
+        
+        if (!anomalies || anomalies.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state" style="padding: var(--space-12); text-align: center;">
+                    <div style="width: 64px; height: 64px; margin: 0 auto var(--space-4); border-radius: 16px; background: linear-gradient(135deg, rgba(46, 204, 113, 0.1) 0%, rgba(46, 204, 113, 0.2) 100%); display: flex; align-items: center; justify-content: center;">
+                        <svg width="32" height="32" fill="none" stroke="#2ECC71" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                            <polyline points="22 4 12 14.01 9 11.01"/>
+                        </svg>
+                    </div>
+                    <div class="empty-state-title" style="font-size: var(--text-xl); font-weight: var(--font-semibold); color: var(--color-text-primary); margin-bottom: var(--space-2);">No Anomalies Detected</div>
+                    <div class="empty-state-text" style="font-size: var(--text-base); color: var(--text-secondary); max-width: 400px; margin: 0 auto;">No anomalies detected in the last 24 hours. System is operating normally.</div>
+                </div>
+            `;
+            return;
+        }
+        
+        let html = '<div class="table-responsive"><table class="industrial-table table-striped"><thead><tr><th>Time</th><th>Machine</th><th>Type</th><th>Severity</th><th>Confidence</th><th>Status</th></tr></thead><tbody>';
+        
+        anomalies.slice(0, 10).forEach(anomaly => {
+            // Professional badge styling with dot indicators for priority items
+            const severityConfig = {
+                'critical': { class: 'badge-danger badge-with-dot', text: 'Critical' },
+                'warning': { class: 'badge-warning badge-with-dot', text: 'Warning' },
+                'normal': { class: 'badge-info', text: 'Normal' },
+                'info': { class: 'badge-info', text: 'Info' }
+            };
+            const severity = severityConfig[anomaly.severity] || severityConfig['info'];
+            
+            // Status badges - resolved gets dot for emphasis, active is standard
+            const statusConfig = anomaly.is_resolved 
+                ? { class: 'badge-success badge-with-dot', text: 'Resolved' }
+                : { class: 'badge-info', text: 'Active' };
+            
+            html += `
+                <tr>
+                    <td style="white-space: nowrap; color: var(--color-gray-600);">${formatDate(anomaly.detected_at)}</td>
+                    <td style="font-weight: var(--font-semibold); color: var(--color-gray-900);">${anomaly.machine_name || anomaly.machine_id}</td>
+                    <td style="color: var(--color-gray-700);">${anomaly.anomaly_type === 'unknown' ? 'Energy Deviation' : anomaly.anomaly_type}</td>
+                    <td><span class="badge ${severity.class}">${severity.text}</span></td>
+                    <td style="font-weight: var(--font-semibold); color: var(--color-gray-800);">${formatNumber(anomaly.confidence_score * 100, 0)}%</td>
+                    <td><span class="badge ${statusConfig.class}">${statusConfig.text}</span></td>
+                </tr>
+            `;
+        });
+        
+        html += '</tbody></table></div>';
+        
+        if (anomalies.length > 10) {
+            html += `<div style="margin-top: var(--space-4); text-align: right;"><a href="/api/analytics/ui/anomaly" style="color: var(--color-primary); font-weight: var(--font-medium); text-decoration: none;">View all ${anomalies.length} anomalies →</a></div>`;
+        }
+        
+        container.innerHTML = html;
+    }
+    
+    // Load Recent Anomalies (can be called independently for real-time updates)
+    async function loadRecentAnomalies() {
+        try {
+            // Calculate 24-hour time window
+            const endTime = new Date();
+            const startTime = new Date(endTime.getTime() - (24 * 60 * 60 * 1000));
+            
+            const anomaliesResponse = await axios.get(`${API_BASE}/anomaly/recent`, {
+                params: {
+                    start_time: startTime.toISOString(),
+                    end_time: endTime.toISOString(),
+                    limit: 100
+                }
+            });
+            
+            // Fix: API returns {anomalies: [...], total_count: N}
+            const anomaliesData = anomaliesResponse.data.anomalies || [];
+            displayRecentAnomalies(anomaliesData);
+            
+            // Update stats with total count from API
+            document.getElementById('anomalies-24h-count').textContent = anomaliesResponse.data.total_count || anomaliesData.length;
+            
+        } catch (error) {
+            console.error('Error loading recent anomalies:', error);
+        }
+    }
+    
+    // Initialize Dashboard
+    async function initDashboard() {
+        console.log('[Dashboard] Initializing dashboard...');
+        
+        // Load initial data
+        await loadDashboard();
+        
+        // Initialize WebSocket connections for real-time updates
+        initWebSockets();
+        
+        console.log('[Dashboard] Dashboard initialized ✓');
+    }
+    
+    // Load on page ready
+    document.addEventListener('DOMContentLoaded', initDashboard);
+    
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', () => {
+        if (wsManager) {
+            wsManager.disconnectAll(true);
+        }
+    });
+</script>
+{% endblock %}

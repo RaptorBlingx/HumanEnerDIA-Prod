@@ -1,0 +1,265 @@
+<!-- Carbon Footprint Analysis -->
+<div class="section carbon-analysis" style="padding: 2rem; page-break-after: always;">
+    <!-- Section Header -->
+    <div style="margin-bottom: 2rem; border-bottom: 3px solid #48bb78; padding-bottom: 1rem;">
+        <h1 style="font-size: 32px; font-weight: 700; color: #1a365d; margin: 0 0 0.5rem 0;">
+            Carbon Footprint Analysis
+        </h1>
+        <p style="font-size: 14px; color: #718096; margin: 0;">
+            Environmental impact and sustainability metrics for {{ period_name }}
+        </p>
+    </div>
+    
+    <!-- Key Metrics -->
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; margin-bottom: 2rem;">
+        <!-- Total Emissions -->
+        <div style="
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            border-radius: 12px;
+            padding: 2rem;
+            color: white;
+        ">
+            <div style="font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.9; margin-bottom: 1rem;">
+                🌍 Total CO₂ Emissions
+            </div>
+            <div style="font-size: 36px; font-weight: 700; margin-bottom: 0.5rem;">
+                {{ total_emissions }}
+            </div>
+            <div style="font-size: 14px; opacity: 0.9;">
+                {% if emissions_positive %}↓{% else %}↑{% endif %} {{ emissions_change_pct|round(1) }}% vs previous
+            </div>
+        </div>
+        
+        <!-- Carbon Intensity -->
+        <div style="background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 2rem;">
+            <div style="font-size: 12px; font-weight: 600; text-transform: uppercase; color: #718096; margin-bottom: 1rem;">
+                Carbon Intensity
+            </div>
+            <div style="font-size: 36px; font-weight: 700; color: #1a365d; margin-bottom: 0.5rem;">
+                {{ carbon_intensity }}
+            </div>
+            <div style="font-size: 14px; color: {% if intensity_positive %}#48bb78{% else %}#e53e3e{% endif %};">
+                kg CO₂/kWh
+            </div>
+        </div>
+        
+        <!-- Renewable % -->
+        <div style="background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 2rem;">
+            <div style="font-size: 12px; font-weight: 600; text-transform: uppercase; color: #718096; margin-bottom: 1rem;">
+                Renewable Energy
+            </div>
+            <div style="font-size: 36px; font-weight: 700; color: {% if renewable_status == 'excellent' %}#48bb78{% elif renewable_status == 'good' %}#4299e1{% elif renewable_status == 'fair' %}#ed8936{% else %}#e53e3e{% endif %}; margin-bottom: 0.5rem;">
+                {{ renewable_pct|round(1) }}%
+            </div>
+            <div style="font-size: 14px; color: #718096;">
+                of energy mix
+            </div>
+        </div>
+        
+        <!-- Target Progress -->
+        <div style="background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 2rem;">
+            <div style="font-size: 12px; font-weight: 600; text-transform: uppercase; color: #718096; margin-bottom: 1rem;">
+                Reduction Target
+            </div>
+            <div style="font-size: 36px; font-weight: 700; color: {% if on_track %}#48bb78{% else %}#ed8936{% endif %}; margin-bottom: 0.5rem;">
+                {{ target_progress_pct|round(0) }}%
+            </div>
+            <div style="font-size: 14px; color: #718096;">
+                by {{ target_deadline }}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Emissions Breakdown Chart -->
+    {% if has_breakdown_chart %}
+    <div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.5rem; margin-bottom: 2rem;">
+        <h3 style="font-size: 18px; font-weight: 600; color: #1a365d; margin: 0 0 1rem 0;">
+            Emissions by Category
+        </h3>
+        <div style="width: 100%; max-width: 100%; overflow: hidden;">
+            {{ emissions_breakdown_chart_html|safe }}
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Category Rankings -->
+    <div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.5rem; margin-bottom: 2rem;">
+        <h3 style="font-size: 18px; font-weight: 600; color: #1a365d; margin: 0 0 1rem 0;">
+            Emissions by Category
+        </h3>
+        
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="border-bottom: 2px solid #e2e8f0;">
+                    <th style="padding: 0.75rem; text-align: left; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #718096;">
+                        Category
+                    </th>
+                    <th style="padding: 0.75rem; text-align: right; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #718096;">
+                        Energy (kWh)
+                    </th>
+                    <th style="padding: 0.75rem; text-align: right; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #718096;">
+                        CO₂ Emissions
+                    </th>
+                    <th style="padding: 0.75rem; text-align: right; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #718096;">
+                        % of Total
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for category in categories %}
+                <tr style="border-bottom: 1px solid #f7fafc;">
+                    <td style="padding: 1rem; font-weight: 600; color: #2d3748;">
+                        {{ category.name }}
+                    </td>
+                    <td style="padding: 1rem; text-align: right; color: #4a5568;">
+                        {{ category.kwh_formatted }} kWh
+                    </td>
+                    <td style="padding: 1rem; text-align: right; font-weight: 700; color: #1a365d;">
+                        {{ category.emissions_formatted }} kg
+                    </td>
+                    <td style="padding: 1rem; text-align: right;">
+                        <div style="
+                            display: inline-block;
+                            padding: 0.25rem 0.75rem;
+                            background: #f7fafc;
+                            border-radius: 12px;
+                            font-weight: 600;
+                            font-size: 13px;
+                            color: #2d3748;
+                        ">
+                            {{ category.percentage|round(1) }}%
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Intensity Gauge & Energy Mix -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem; page-break-before: always; page-break-inside: avoid;">
+        {% if has_intensity_gauge %}
+        <div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.5rem;">
+            <h3 style="font-size: 16px; font-weight: 600; color: #1a365d; margin: 0 0 1rem 0;">
+                Carbon Intensity Status
+            </h3>
+            <div style="width: 100%; max-width: 100%; overflow: hidden;">
+                {{ intensity_gauge_html|safe }}
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Energy Mix -->
+        <div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.5rem;">
+            <h3 style="font-size: 16px; font-weight: 600; color: #1a365d; margin: 0 0 1rem 0;">
+                Energy Mix
+            </h3>
+            <div style="display: grid; gap: 1rem;">
+                <div style="background: #f0fff4; padding: 1rem; border-radius: 6px; border-left: 4px solid #48bb78;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <div style="font-size: 13px; color: #718096; margin-bottom: 0.25rem;">Renewable</div>
+                            <div style="font-size: 24px; font-weight: 700; color: #48bb78;">{{ renewable_pct|round(1) }}%</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="
+                                background: #48bb78;
+                                color: white;
+                                padding: 0.25rem 0.75rem;
+                                border-radius: 4px;
+                                font-size: 11px;
+                                font-weight: 600;
+                                text-transform: uppercase;
+                            ">
+                                {{ renewable_status }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="background: #fff5f5; padding: 1rem; border-radius: 6px; border-left: 4px solid #e53e3e;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <div style="font-size: 13px; color: #718096; margin-bottom: 0.25rem;">Fossil Fuels</div>
+                            <div style="font-size: 24px; font-weight: 700; color: #e53e3e;">{{ fossil_pct|round(1) }}%</div>
+                        </div>
+                        <div style="text-align: right; font-size: 12px; color: #718096;">
+                            Grid Factor: {{ grid_factor }} kg/kWh
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Emissions Trend -->
+    {% if has_trend_chart %}
+    <div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.5rem; margin-bottom: 2rem;">
+        <h3 style="font-size: 18px; font-weight: 600; color: #1a365d; margin: 0 0 1rem 0;">
+            Emissions Trend Over Time
+        </h3>
+        {{ emissions_trend_chart_html|safe }}
+    </div>
+    {% endif %}
+    
+    <!-- Equivalents -->
+    <div style="background: linear-gradient(135deg, #48bb78 0%, #38a169 100%); border-radius: 8px; padding: 1.5rem; margin-bottom: 2rem; color: white;">
+        <h3 style="font-size: 18px; font-weight: 600; margin: 0 0 1rem 0;">
+            🌳 Environmental Context
+        </h3>
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;">
+            <div style="background: rgba(255, 255, 255, 0.15); padding: 1.5rem; border-radius: 6px;">
+                <div style="font-size: 14px; opacity: 0.9; margin-bottom: 0.5rem;">Trees needed to absorb</div>
+                <div style="font-size: 36px; font-weight: 700; margin-bottom: 0.5rem;">{{ tree_months }}</div>
+                <div style="font-size: 13px; opacity: 0.9;">tree-months</div>
+            </div>
+            <div style="background: rgba(255, 255, 255, 0.15); padding: 1.5rem; border-radius: 6px;">
+                <div style="font-size: 14px; opacity: 0.9; margin-bottom: 0.5rem;">Equivalent to driving</div>
+                <div style="font-size: 36px; font-weight: 700; margin-bottom: 0.5rem;">{{ car_miles }}</div>
+                <div style="font-size: 13px; opacity: 0.9;">miles in a car</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Reduction Initiatives -->
+    {% if has_initiatives %}
+    <div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.5rem;">
+        <h3 style="font-size: 18px; font-weight: 600; color: #1a365d; margin: 0 0 1rem 0;">
+            Emission Reduction Initiatives ({{ initiative_count }})
+        </h3>
+        
+        <div style="display: grid; gap: 0.75rem;">
+            {% for init in reduction_initiatives %}
+            <div style="border-left: 4px solid #48bb78; padding: 1rem; background: #f0fff4;">
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+                    <div style="flex: 1;">
+                        <div style="font-weight: 600; color: #2d3748; font-size: 14px; margin-bottom: 0.25rem;">
+                            {{ init.title }}
+                        </div>
+                        <div style="font-size: 13px; color: #4a5568;">
+                            {{ init.description }}
+                        </div>
+                    </div>
+                    <div style="
+                        background: #48bb78;
+                        color: white;
+                        padding: 0.25rem 0.75rem;
+                        border-radius: 4px;
+                        font-size: 11px;
+                        font-weight: 600;
+                        white-space: nowrap;
+                        margin-left: 1rem;
+                    ">
+                        {{ init.status }}
+                    </div>
+                </div>
+                <div style="display: flex; gap: 2rem; margin-top: 0.75rem; font-size: 13px; color: #48bb78; font-weight: 600;">
+                    <div>📉 Reduction: {{ init.annual_reduction }}</div>
+                    <div>Timeline: {{ init.timeline }}</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>

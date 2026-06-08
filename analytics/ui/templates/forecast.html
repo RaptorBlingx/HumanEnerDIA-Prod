@@ -1,0 +1,652 @@
+{% extends "base.html" %}
+
+{% block title %}Energy Forecasting - EnMS Analytics{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="display-6">Energy Forecasting</h1>
+        <p class="text-muted">Predict future energy demand using ARIMA and Prophet models</p>
+    </div>
+</div>
+
+<!-- Model Training Section -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Train Models</h5>
+            </div>
+            <div class="card-body">
+                <form id="train-form">
+                    <div class="mb-3">
+                        <label for="train-machine-select" class="form-label">Machine</label>
+                        <select class="form-select" id="train-machine-select" required>
+                            <option value="">Select machine...</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="model-type-select" class="form-label">
+                            Model Type
+                            <i class="bi bi-info-circle text-primary" 
+                               data-bs-toggle="tooltip" 
+                               data-bs-placement="right"
+                               data-bs-html="true"
+                               title="<strong>ARIMA:</strong> Fast, short-term (1-4 hours). Simple time-series analysis. Good for real-time operational decisions.<br><br><strong>Prophet:</strong> Powerful, medium/long-term (24h-7 days). Captures seasonality patterns and uses external factors like temperature and production."
+                               style="cursor: help; font-size: 1rem;"></i>
+                        </label>
+                        <select class="form-select" id="model-type-select" required>
+                            <option value="arima">ARIMA (Short-term: 1-4 hours)</option>
+                            <option value="prophet">Prophet (Medium/Long-term: 24h-7d)</option>
+                        </select>
+                        <small class="form-text text-muted">
+                            <strong>ARIMA:</strong> Best for immediate forecasts<br>
+                            <strong>Prophet:</strong> Best for daily/weekly planning
+                        </small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="lookback-days" class="form-label">Training Period (days)</label>
+                        <input type="number" class="form-control" id="lookback-days" 
+                               min="7" max="90" value="7" required>
+                        <small class="form-text text-muted">
+                            ARIMA: 7-30 days | Prophet: 30-90 days
+                        </small>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-100" id="train-button">
+                        <span class="spinner-border spinner-border-sm d-none" id="train-spinner"></span>
+                        Train Model
+                    </button>
+                </form>
+                
+                <div id="train-result" class="mt-3"></div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">Generate Forecast</h5>
+            </div>
+            <div class="card-body">
+                <form id="forecast-form">
+                    <div class="mb-3">
+                        <label for="forecast-machine-select" class="form-label">Machine</label>
+                        <select class="form-select" id="forecast-machine-select" required>
+                            <option value="">Select machine...</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="horizon-select" class="form-label">
+                            Forecast Horizon
+                            <i class="bi bi-info-circle text-primary" 
+                               data-bs-toggle="tooltip" 
+                               data-bs-placement="right"
+                               data-bs-html="true"
+                               title="<strong>Short (1-4h):</strong> 15-minute intervals. Use for immediate planning and real-time load balancing.<br><br><strong>Medium (24h):</strong> Hourly intervals. Use for day-ahead scheduling and shift planning.<br><br><strong>Long (7 days):</strong> Hourly intervals. Use for weekly capacity planning and maintenance scheduling."
+                               style="cursor: help; font-size: 1rem;"></i>
+                        </label>
+                        <select class="form-select" id="horizon-select" required>
+                            <option value="short">Short (1-4 hours)</option>
+                            <option value="medium">Medium (24 hours)</option>
+                            <option value="long">Long (7 days)</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-success w-100" id="forecast-button">
+                        <span class="spinner-border spinner-border-sm d-none" id="forecast-spinner"></span>
+                        Generate Forecast
+                    </button>
+                </form>
+                
+                <div id="forecast-result" class="mt-3"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Forecast Chart -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Forecast Visualization</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="forecast-chart" height="80"></canvas>
+                <div id="forecast-chart-placeholder" class="text-center py-5 text-muted">
+                    <svg width="64" height="64" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                        <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
+                    </svg>
+                    <p class="mt-3">Generate a forecast to see visualization</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Optimal Schedule Section -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">⚡ Schedule Energy-Intensive Operations</h5>
+            </div>
+            <div class="card-body">
+                <p class="mb-2">Find the best time to run your equipment and save on energy costs</p>
+                <div class="alert alert-light border mb-3" style="font-size: 0.9rem;">
+                    <strong>Tariffs Used:</strong> 
+                    <span class="badge bg-warning text-dark">Peak (8am-8pm)</span> $0.20/kWh | 
+                    <span class="badge bg-success">Off-Peak</span> $0.10/kWh
+                    <br>
+                    <small class="text-muted">💡 Typical savings: 15-30% by scheduling during off-peak hours</small>
+                </div>
+                
+                <form id="schedule-form" class="row g-3">
+                    <div class="col-md-3">
+                        <label for="schedule-machine-select" class="form-label">Machine</label>
+                        <select class="form-select" id="schedule-machine-select" required>
+                            <option value="">Select machine...</option>
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <label for="schedule-date" class="form-label">Date</label>
+                        <input type="date" class="form-control" id="schedule-date" required>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <label for="load-kw" class="form-label">
+                            Load (kW)
+                            <i class="bi bi-info-circle text-primary" 
+                               data-bs-toggle="tooltip" 
+                               data-bs-placement="top"
+                               data-bs-html="true"
+                               title="<strong>What is Load (kW)?</strong><br>The power consumption of the operation you want to schedule.<br><br><strong>Examples:</strong><br>• Small pump: ~5 kW<br>• Compressor: ~50 kW<br>• Furnace: ~100 kW<br>• Large motor: ~200 kW"
+                               style="cursor: help; font-size: 0.9rem;"></i>
+                        </label>
+                        <input type="number" class="form-control" id="load-kw" 
+                               min="0.1" step="0.1" value="10" required
+                               placeholder="e.g., 10">
+                    </div>
+                    
+                    <div class="col-md-3 d-flex align-items-end">
+                        <button type="submit" class="btn btn-info w-100">
+                            <span class="spinner-border spinner-border-sm d-none" id="schedule-spinner"></span>
+                            Find Optimal Time
+                        </button>
+                    </div>
+                </form>
+                
+                <div id="schedule-result" class="mt-4"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Model Status -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Trained Models</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover" id="models-table">
+                        <thead>
+                            <tr>
+                                <th>Machine</th>
+                                <th>ARIMA Status</th>
+                                <th>ARIMA Last Trained</th>
+                                <th>Prophet Status</th>
+                                <th>Prophet Last Trained</th>
+                            </tr>
+                        </thead>
+                        <tbody id="models-tbody">
+                            <tr>
+                                <td colspan="5" class="text-center text-muted">Loading...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let forecastChart = null;
+    
+    // Load machines
+    async function loadMachines() {
+        try {
+            const response = await axios.get(`${API_BASE}/machines`);
+            const machines = response.data;
+            
+            const machineSelects = [
+                'train-machine-select',
+                'forecast-machine-select',
+                'schedule-machine-select'
+            ];
+            
+            machineSelects.forEach(selectId => {
+                const select = document.getElementById(selectId);
+                machines.forEach(machine => {
+                    const option = document.createElement('option');
+                    option.value = machine.id;
+                    option.textContent = machine.name;
+                    select.appendChild(option);
+                });
+            });
+            
+            // Load model status
+            if (machines.length > 0) {
+                loadModelStatus(machines);
+            }
+        } catch (error) {
+            console.error('Error loading machines:', error);
+        }
+    }
+    
+    // Load model status for all machines
+    async function loadModelStatus(machines) {
+        const tbody = document.getElementById('models-tbody');
+        tbody.innerHTML = '';
+        
+        for (const machine of machines) {
+            try {
+                const response = await axios.get(`${API_BASE}/forecast/models/${machine.id}`);
+                const status = response.data;
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${machine.name}</td>
+                    <td>
+                        <span class="badge bg-${status.arima.trained ? 'success' : 'secondary'}">
+                            ${status.arima.trained ? 'Trained' : 'Not Trained'}
+                        </span>
+                    </td>
+                    <td>${status.arima.last_modified ? new Date(status.arima.last_modified).toLocaleString() : '-'}</td>
+                    <td>
+                        <span class="badge bg-${status.prophet.trained ? 'success' : 'secondary'}">
+                            ${status.prophet.trained ? 'Trained' : 'Not Trained'}
+                        </span>
+                    </td>
+                    <td>${status.prophet.last_modified ? new Date(status.prophet.last_modified).toLocaleString() : '-'}</td>
+                `;
+                tbody.appendChild(row);
+            } catch (error) {
+                console.error(`Error loading status for ${machine.name}:`, error);
+            }
+        }
+    }
+    
+    // Train model
+    document.getElementById('train-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const machineId = document.getElementById('train-machine-select').value;
+        const modelType = document.getElementById('model-type-select').value;
+        const lookbackDays = parseInt(document.getElementById('lookback-days').value);
+        
+        const button = document.getElementById('train-button');
+        const spinner = document.getElementById('train-spinner');
+        const resultDiv = document.getElementById('train-result');
+        
+        button.disabled = true;
+        spinner.classList.remove('d-none');
+        resultDiv.innerHTML = '';
+        
+        try {
+            const response = await axios.post(
+                `${API_BASE}/forecast/train/${modelType}`,
+                {
+                    machine_id: machineId,
+                    lookback_days: lookbackDays,
+                    auto_order: true,
+                    use_regressors: true
+                }
+            );
+            
+            const result = response.data;
+            
+            // Determine quality badge based on MAPE
+            let qualityBadge = '';
+            let qualityText = '';
+            const mape = result.mape;
+            if (mape < 5) {
+                qualityBadge = '<span class="badge bg-success">Excellent</span>';
+                qualityText = 'Model quality is excellent for production use';
+            } else if (mape < 10) {
+                qualityBadge = '<span class="badge bg-primary">Good</span>';
+                qualityText = 'Model quality is good for most applications';
+            } else if (mape < 20) {
+                qualityBadge = '<span class="badge bg-warning">Fair</span>';
+                qualityText = 'Model quality is acceptable, consider more training data for better accuracy';
+            } else {
+                qualityBadge = '<span class="badge bg-danger">Poor</span>';
+                qualityText = 'Model quality is below recommended threshold. Try increasing training period or checking data quality.';
+            }
+            
+            // Build features list for Prophet
+            let featuresHtml = '';
+            if (result.model_type === 'Prophet' && result.regressors) {
+                const featureIcons = {
+                    'outdoor_temp_c': '🌡️ Temperature',
+                    'production_count': '📦 Production',
+                    'hour': '🕐 Hour of Day',
+                    'day_of_week': '📅 Day of Week',
+                    'is_weekend': '🏖️ Weekend',
+                    'is_working_hours': '⏰ Working Hours',
+                    'season': '🌸 Season'
+                };
+                
+                const featureLabels = result.regressors.map(r => 
+                    featureIcons[r] || r.replace(/_/g, ' ')
+                ).join(', ');
+                
+                featuresHtml = `
+                    <hr style="margin: 0.75rem 0;">
+                    <small class="text-muted"><strong>Features Used:</strong></small><br>
+                    <small>${featureLabels}</small><br>
+                    <small class="text-muted">These factors influence the forecast predictions</small>
+                `;
+            }
+            
+            resultDiv.innerHTML = `
+                <div class="alert alert-success">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <strong>✓ Training Complete!</strong>
+                        ${qualityBadge}
+                    </div>
+                    <small class="text-muted d-block mb-2">${qualityText}</small>
+                    <strong>Model:</strong> ${result.model_type}<br>
+                    <strong>Samples:</strong> ${result.training_samples.toLocaleString()}<br>
+                    <strong>RMSE:</strong> ${result.rmse.toFixed(3)} kW<br>
+                    <strong>MAPE:</strong> ${result.mape.toFixed(2)}% 
+                    <i class="bi bi-info-circle text-muted" 
+                       data-bs-toggle="tooltip" 
+                       title="Mean Absolute Percentage Error - Lower is better. <5% is excellent, <10% is good."
+                       style="cursor: help; font-size: 0.85rem;"></i>
+                    ${result.r2 ? `<br><strong>R²:</strong> ${result.r2.toFixed(4)}` : ''}
+                    ${featuresHtml}
+                </div>
+            `;
+            
+            // Re-initialize tooltips for the new elements
+            const tooltipTriggerList = resultDiv.querySelectorAll('[data-bs-toggle="tooltip"]');
+            [...tooltipTriggerList].map(el => new bootstrap.Tooltip(el));
+            
+            // Refresh model status
+            loadMachines();
+            
+        } catch (error) {
+            resultDiv.innerHTML = `
+                <div class="alert alert-danger">
+                    <strong>✗ Training Failed</strong><br>
+                    ${error.response?.data?.detail || error.message}
+                </div>
+            `;
+        } finally {
+            button.disabled = false;
+            spinner.classList.add('d-none');
+        }
+    });
+    
+    // Generate forecast
+    document.getElementById('forecast-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const machineId = document.getElementById('forecast-machine-select').value;
+        const horizon = document.getElementById('horizon-select').value;
+        
+        const button = document.getElementById('forecast-button');
+        const spinner = document.getElementById('forecast-spinner');
+        const resultDiv = document.getElementById('forecast-result');
+        
+        button.disabled = true;
+        spinner.classList.remove('d-none');
+        resultDiv.innerHTML = '';
+        
+        try {
+            const response = await axios.post(
+                `${API_BASE}/forecast/predict`,
+                {
+                    machine_id: machineId,
+                    horizon: horizon
+                }
+            );
+            
+            const forecast = response.data;
+            
+            // Calculate average
+            const avg = forecast.predictions.reduce((a,b) => a+b) / forecast.predictions.length;
+            
+            // Use confidence bounds if available, otherwise use prediction min/max
+            let rangeMin, rangeMax;
+            if (forecast.confidence_intervals && forecast.confidence_intervals.lower) {
+                // ARIMA model returns nested confidence_intervals
+                rangeMin = Math.min(...forecast.confidence_intervals.lower);
+                rangeMax = Math.max(...forecast.confidence_intervals.upper);
+            } else if (forecast.lower_bound && forecast.upper_bound && forecast.lower_bound.length > 0) {
+                // Prophet model returns lower_bound/upper_bound directly
+                rangeMin = Math.min(...forecast.lower_bound);
+                rangeMax = Math.max(...forecast.upper_bound);
+            } else {
+                // Fallback: estimate ±5% range around average
+                rangeMin = avg * 0.95;
+                rangeMax = avg * 1.05;
+            }
+            
+            resultDiv.innerHTML = `
+                <div class="alert alert-success">
+                    <strong>✓ Forecast Generated!</strong><br>
+                    Model: ${forecast.model_type}<br>
+                    Periods: ${forecast.periods}<br>
+                    Average: ${avg.toFixed(2)} kW<br>
+                    Range: ${rangeMin.toFixed(2)} - ${rangeMax.toFixed(2)} kW
+                </div>
+            `;
+            
+            // Draw chart
+            drawForecastChart(forecast);
+            
+        } catch (error) {
+            resultDiv.innerHTML = `
+                <div class="alert alert-danger">
+                    <strong>✗ Forecast Failed</strong><br>
+                    ${error.response?.data?.detail || error.message}
+                </div>
+            `;
+        } finally {
+            button.disabled = false;
+            spinner.classList.add('d-none');
+        }
+    });
+    
+    // Draw forecast chart
+    function drawForecastChart(forecast) {
+        const placeholder = document.getElementById('forecast-chart-placeholder');
+        placeholder.classList.add('d-none');
+        
+        const ctx = document.getElementById('forecast-chart');
+        
+        // Destroy existing chart
+        if (forecastChart) {
+            forecastChart.destroy();
+        }
+        
+        // Prepare labels
+        const labels = forecast.timestamps || 
+                      forecast.predictions.map((_, i) => `T+${i+1}`);
+        
+        const datasets = [
+            {
+                label: 'Predicted Demand (kW)',
+                data: forecast.predictions,
+                borderColor: 'rgb(75, 192, 192)',
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                tension: 0.1,
+                fill: false
+            }
+        ];
+        
+        // Add confidence intervals if available
+        if (forecast.lower_bound && forecast.upper_bound) {
+            datasets.push({
+                label: 'Lower Bound',
+                data: forecast.lower_bound,
+                borderColor: 'rgba(75, 192, 192, 0.3)',
+                borderDash: [5, 5],
+                fill: false
+            });
+            datasets.push({
+                label: 'Upper Bound',
+                data: forecast.upper_bound,
+                borderColor: 'rgba(75, 192, 192, 0.3)',
+                borderDash: [5, 5],
+                fill: '-1',
+                backgroundColor: 'rgba(75, 192, 192, 0.1)'
+            });
+        }
+        
+        forecastChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: datasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: `Energy Demand Forecast - ${forecast.model_type} (${forecast.horizon})`
+                    },
+                    legend: {
+                        display: true
+                    }
+                },
+                scales: {
+                    x: {
+                        display: true,
+                        title: {
+                            display: true,
+                            text: 'Time'
+                        }
+                    },
+                    y: {
+                        display: true,
+                        title: {
+                            display: true,
+                            text: 'Power (kW)'
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    // Optimal schedule
+    document.getElementById('schedule-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const machineId = document.getElementById('schedule-machine-select').value;
+        const date = document.getElementById('schedule-date').value;
+        const loadKw = parseFloat(document.getElementById('load-kw').value);
+        
+        const spinner = document.getElementById('schedule-spinner');
+        const resultDiv = document.getElementById('schedule-result');
+        
+        spinner.classList.remove('d-none');
+        resultDiv.innerHTML = '';
+        
+        try {
+            const response = await axios.post(
+                `${API_BASE}/forecast/optimal-schedule`,
+                {
+                    machine_id: machineId,
+                    date: new Date(date).toISOString(),
+                    load_kw: loadKw
+                }
+            );
+            
+            const schedule = response.data;
+            
+            let html = '<h6 class="mt-3">Top 3 Recommended Times:</h6>';
+            html += '<div class="row">';
+            
+            // Calculate best savings
+            const bestSavings = Math.max(...schedule.recommendations.map(r => r.potential_savings_usd));
+            
+            if (bestSavings > 0) {
+                html += `
+                    <div class="alert alert-success mb-3">
+                        <strong>💰 Best option saves $${bestSavings.toFixed(2)}</strong> compared to peak hours
+                    </div>
+                `;
+            }
+            
+            schedule.recommendations.forEach((rec, i) => {
+                html += `
+                    <div class="col-md-4">
+                        <div class="card border-${i === 0 ? 'success' : 'info'}">
+                            <div class="card-body">
+                                <h6 class="card-title">
+                                    ${i === 0 ? '🏆 ' : ''}Option ${i + 1}
+                                </h6>
+                                <p class="card-text">
+                                    <strong>Time:</strong> ${new Date(rec.timestamp).toLocaleString()}<br>
+                                    <strong>Predicted Demand:</strong> ${rec.predicted_demand_kw} kW<br>
+                                    <strong>Total with Load:</strong> ${rec.total_demand_kw} kW<br>
+                                    <strong>Cost:</strong> $${rec.cost_usd}<br>
+                                    ${rec.potential_savings_usd > 0 ? 
+                                      `<strong class="text-success">Savings: $${rec.potential_savings_usd}</strong>` : 
+                                      '<span class="text-muted">Already optimal</span>'}
+                                </p>
+                                <span class="badge bg-${rec.is_peak_hour ? 'warning' : 'success'}">
+                                    ${rec.is_peak_hour ? 'Peak Hours' : 'Off-Peak'}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            resultDiv.innerHTML = html;
+            
+        } catch (error) {
+            resultDiv.innerHTML = `
+                <div class="alert alert-danger">
+                    <strong>✗ Schedule Generation Failed</strong><br>
+                    ${error.response?.data?.detail || error.message}
+                </div>
+            `;
+        } finally {
+            spinner.classList.add('d-none');
+        }
+    });
+    
+    // Set default date to today
+    document.getElementById('schedule-date').valueAsDate = new Date();
+    
+    // Initialize Bootstrap tooltips
+    window.addEventListener('DOMContentLoaded', () => {
+        loadMachines();
+        
+        // Enable all tooltips
+        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+        [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+    });
+</script>
+{% endblock %}

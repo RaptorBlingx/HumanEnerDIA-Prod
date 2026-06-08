@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Energy Flow - Sankey Diagram | EnMS</title>
+    
+    <!-- Google Fonts - Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Industrial Design System -->
+    <link rel="stylesheet" href="/css/enms-industrial.css">
+    
+    <!-- Sidebar Component -->
+    <link rel="stylesheet" href="/css/sidebar.css?v=1765871462">
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
+    <!-- OVOS Voice Widget CSS -->
+    <link rel="stylesheet" href="/css/ovos-voice-widget.css?v=20260108f">
+    
+    <!-- D3.js -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+    <!-- D3 Sankey Plugin -->
+    <script src="https://unpkg.com/d3-sankey@0.12.3/dist/d3-sankey.min.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background-color: #f8fafc;
+            min-height: 100vh;
+        }
+        
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 64px 40px 80px;
+        }
+        
+        .controls-panel {
+            background: white;
+            border-radius: 16px;
+            padding: 32px 40px;
+            margin-bottom: 48px;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        
+        .controls-panel label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #374151;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .controls-panel input,
+        .controls-panel button {
+            width: 100%;
+            padding: 16px 20px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .controls-panel input:focus {
+            outline: none;
+            border-color: #00A8E8;
+            box-shadow: 0 0 0 3px rgba(0, 168, 232, 0.1);
+        }
+        
+        .controls-panel button {
+            background: linear-gradient(135deg, #0A2463 0%, #00A8E8 100%);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .controls-panel button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(10, 36, 99, 0.4);
+        }
+        
+        .metric-card {
+            text-align: center;
+            padding: 24px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            border-radius: 16px;
+            border: 1px solid #e5e7eb;
+            transition: all 0.3s ease;
+        }
+        
+        .metric-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+        }
+        
+        .metric-card .icon {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 16px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .metric-card h3 {
+            font-size: 42px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            line-height: 1;
+        }
+        
+        .metric-card p {
+            font-size: 13px;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        #sankey-chart {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            min-height: 600px;
+            position: relative;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        
+        .node rect {
+            cursor: pointer;
+            stroke: #1f2937;
+            stroke-width: 1px;
+        }
+        
+        .node text {
+            pointer-events: none;
+            font-size: 12px;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            fill: #1f2937;
+        }
+        
+        .link {
+            fill: none;
+            stroke-opacity: 0.3;
+        }
+        
+        .link:hover {
+            stroke-opacity: 0.6;
+        }
+        
+        .tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            pointer-events: none;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        
+        .loading-spinner {
+            text-align: center;
+            padding: 4rem;
+        }
+        
+        .spinner-border {
+            width: 4rem;
+            height: 4rem;
+            color: var(--color-primary);
+        }
+        
+        .legend {
+            margin-top: 32px;
+            padding: 24px 32px;
+            background: white;
+            border-radius: 16px;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        
+        .legend strong {
+            font-size: 14px;
+            color: #1f2937;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 600;
+        }
+        
+        .legend-item {
+            display: inline-block;
+            margin-right: 32px;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #6b7280;
+            font-weight: 500;
+        }
+        
+        .legend-color {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            margin-right: 10px;
+            vertical-align: middle;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+    </style>
+</head>
+<body>
+    <!-- Hamburger Menu Header -->
+    <header class="industrial-header" style="padding: 1rem 2rem;">
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 1rem; width: 100%;">
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <button onclick="toggleSidebar()" class="hamburger-btn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
+                <a href="/" class="industrial-logo" style="display: flex; align-items: center; gap: 0.5rem; color: white; text-decoration: none;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                    </svg>
+                    <span>HumanEnerDIA</span>
+                </a>
+            </div>
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <!-- Notification Bell -->
+                <div class="notification-bell-container">
+                    <button id="notification-bell" class="notification-bell-btn" onclick="toggleNotificationPanel()" title="Notifications">
+                        <i class="bi bi-bell-fill"></i>
+                        <span id="notification-badge" class="notification-badge" style="display: none;"></span>
+                    </button>
+                    <div id="notification-panel" class="notification-panel" style="display: none;">
+                        <div class="notification-panel-header">
+                            <h3><i class="bi bi-bell"></i> Notifications</h3>
+                            <button onclick="clearAllNotifications()" class="clear-all-btn" title="Clear all">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                        <div id="notification-list" class="notification-list">
+                            <div class="notification-empty">
+                                <i class="bi bi-bell-slash"></i>
+                                <p>No notifications yet</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button id="ovos-enable-voice-nav" style="display: none; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 10px 20px; border-radius: 25px; cursor: pointer; font-weight: 500; align-items: center; gap: 8px; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                        <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                    </svg>
+                    <span>Enable Voice</span>
+                </button>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Sidebar will be injected by sidebar.js -->
+
+    <!-- Hero Section - Premium Design -->
+    <section style="background: linear-gradient(135deg, #0A2463 0%, #1E3A8A 50%, #00A8E8 100%); 
+                    color: white; 
+                    padding: 80px 0; 
+                    position: relative;
+                    overflow: hidden;">
+        <!-- Subtle pattern overlay -->
+        <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; 
+                    background-image: radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.05) 0%, transparent 50%),
+                                      radial-gradient(circle at 80% 80%, rgba(0, 168, 232, 0.1) 0%, transparent 50%);
+                    pointer-events: none;"></div>
+        
+        <div style="position: relative; z-index: 1; max-width: 1400px; margin: 0 auto; text-align: center; padding: 0 40px;">
+            <h1 style="font-size: 56px; 
+                       font-weight: 700; 
+                       margin-bottom: 24px; 
+                       line-height: 1.2;
+                       letter-spacing: -0.02em;
+                       color: #FFFFFF;
+                       text-shadow: 0 2px 8px rgba(0,0,0,0.3), 0 4px 16px rgba(0,0,0,0.2);">
+                <i class="bi bi-diagram-3" style="margin-right: 16px;"></i>
+                Energy Flow Visualization
+            </h1>
+            <p style="font-size: 22px; 
+                     color: #FFFFFF; 
+                     margin-bottom: 0;
+                     line-height: 1.6;
+                     font-weight: 400;
+                     max-width: 700px;
+                     margin: 0 auto;
+                     text-shadow: 0 1px 4px rgba(0,0,0,0.3);">
+                Interactive Sankey diagram showing energy distribution across your facility
+            </p>
+        </div>
+    </section>
+
+    <div class="main-container">
+        <!-- Controls Panel -->
+        <div class="controls-panel">
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px;">
+                <div>
+                    <label><i class="bi bi-calendar-event" style="margin-right: 6px; color: #0A2463;"></i>Start Date</label>
+                    <input type="date" id="start-date" class="form-control">
+                </div>
+                <div>
+                    <label><i class="bi bi-calendar-check" style="margin-right: 6px; color: #00A8E8;"></i>End Date</label>
+                    <input type="date" id="end-date" class="form-control">
+                </div>
+                <div>
+                    <label><i class="bi bi-lightning-charge" style="margin-right: 6px; color: #FF6B35;"></i>Min Energy (kWh)</label>
+                    <input type="number" id="min-energy" class="form-control" value="0" min="0" step="10">
+                </div>
+                <div>
+                    <label>&nbsp;</label>
+                    <button onclick="loadSankeyData()">
+                        <i class="bi bi-arrow-repeat"></i> Update
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Metrics Row -->
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px; margin-bottom: 48px;" id="metrics-row">
+            <div class="metric-card">
+                <div class="icon" style="background: linear-gradient(135deg, #0A2463 0%, #1E3A8A 100%); box-shadow: 0 4px 14px rgba(10, 36, 99, 0.3);">
+                    <svg width="24" height="24" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                    </svg>
+                </div>
+                <h3 id="total-energy" style="color: #0A2463;">-</h3>
+                <p>Total Energy (kWh)</p>
+            </div>
+            <div class="metric-card">
+                <div class="icon" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); box-shadow: 0 4px 14px rgba(240, 147, 251, 0.4);">
+                    <svg width="24" height="24" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                    </svg>
+                </div>
+                <h3 id="factory-count" style="color: #f5576c;">-</h3>
+                <p>Factories</p>
+            </div>
+            <div class="metric-card">
+                <div class="icon" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); box-shadow: 0 4px 14px rgba(79, 172, 254, 0.4);">
+                    <svg width="24" height="24" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
+                    </svg>
+                </div>
+                <h3 id="dept-count" style="color: #00A8E8;">-</h3>
+                <p>Departments</p>
+            </div>
+            <div class="metric-card">
+                <div class="icon" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); box-shadow: 0 4px 14px rgba(67, 233, 123, 0.4);">
+                    <svg width="24" height="24" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/>
+                    </svg>
+                </div>
+                <h3 id="machine-count" style="color: #2ECC71;">-</h3>
+                <p>Machines</p>
+            </div>
+        </div>
+        
+        <!-- Sankey Chart -->
+        <div id="sankey-chart">
+            <div class="loading-spinner">
+                <div class="spinner-border" role="status"></div>
+                <p class="mt-3">Loading energy flow data...</p>
+            </div>
+        </div>
+        
+        <!-- Legend -->
+        <div class="legend">
+            <strong><i class="bi bi-palette" style="margin-right: 8px;"></i>Color Legend:</strong>
+            <div class="legend-item">
+                <span class="legend-color" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"></span>
+                Grid
+            </div>
+            <div class="legend-item">
+                <span class="legend-color" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);"></span>
+                Factory
+            </div>
+            <div class="legend-item">
+                <span class="legend-color" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);"></span>
+                Department
+            </div>
+            <div class="legend-item">
+                <span class="legend-color" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);"></span>
+                Machine
+            </div>
+        </div>
+    </div>
+    
+    <!-- Tooltip -->
+    <div id="tooltip" class="tooltip"></div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // ====================================================================
+        // CONFIGURATION
+        // ====================================================================
+        
+        // API Base URL - detect if accessed through nginx proxy or directly
+        const API_BASE = window.location.port === '8001' ? '/api/v1' : '/api/analytics/api/v1';
+        const API_BASE_URL = `${API_BASE}/sankey`;
+        
+        // Color scheme for different levels
+        const LEVEL_COLORS = {
+            0: '#667eea',  // Grid - Purple
+            1: '#f093fb',  // Factory - Pink
+            2: '#4facfe',  // Department - Blue
+            3: '#43e97b'   // Machine - Green
+        };
+        
+        // ====================================================================
+        // INITIALIZATION
+        // ====================================================================
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set default date range (last 7 days)
+            const endDate = new Date();
+            const startDate = new Date();
+            startDate.setDate(startDate.getDate() - 7);
+            
+            document.getElementById('end-date').valueAsDate = endDate;
+            document.getElementById('start-date').valueAsDate = startDate;
+            
+            // Load initial data
+            loadSankeyData();
+        });
+        
+        // ====================================================================
+        // DATA LOADING
+        // ====================================================================
+        
+        async function loadSankeyData() {
+            try {
+                // Get parameters
+                const startDate = document.getElementById('start-date').value;
+                const endDate = document.getElementById('end-date').value;
+                const minEnergy = document.getElementById('min-energy').value;
+                
+                // Build query string
+                const params = new URLSearchParams({
+                    start_date: startDate + 'T00:00:00Z',
+                    end_date: endDate + 'T23:59:59Z',
+                    min_energy_kwh: minEnergy
+                });
+                
+                // Show loading
+                document.getElementById('sankey-chart').innerHTML = `
+                    <div class="loading-spinner">
+                        <div class="spinner-border" role="status"></div>
+                        <p class="mt-3">Loading energy flow data...</p>
+                    </div>
+                `;
+                
+                // Fetch data
+                const response = await fetch(`${API_BASE_URL}/data?${params}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                // Update metrics
+                updateMetrics(data);
+                
+                // Draw Sankey diagram
+                drawSankey(data);
+                
+            } catch (error) {
+                console.error('Error loading Sankey data:', error);
+                document.getElementById('sankey-chart').innerHTML = `
+                    <div class="alert alert-danger" role="alert">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        <strong>Error loading data:</strong> ${error.message}
+                    </div>
+                `;
+            }
+        }
+        
+        // ====================================================================
+        // METRICS UPDATE
+        // ====================================================================
+        
+        function updateMetrics(data) {
+            document.getElementById('total-energy').textContent = 
+                data.total_energy_kwh.toLocaleString(undefined, {maximumFractionDigits: 0});
+            document.getElementById('factory-count').textContent = data.factory_count;
+            document.getElementById('dept-count').textContent = data.department_count;
+            document.getElementById('machine-count').textContent = data.machine_count;
+        }
+        
+        // ====================================================================
+        // SANKEY DIAGRAM RENDERING
+        // ====================================================================
+        
+        function drawSankey(data) {
+            // Clear previous chart
+            document.getElementById('sankey-chart').innerHTML = '';
+            
+            // Get container dimensions
+            const container = document.getElementById('sankey-chart');
+            const width = container.clientWidth - 40;
+            const height = Math.max(600, data.nodes.length * 20);
+            
+            // Create SVG
+            const svg = d3.select('#sankey-chart')
+                .append('svg')
+                .attr('width', width)
+                .attr('height', height);
+            
+            // Create Sankey generator
+            const sankey = d3.sankey()
+                .nodeId(d => d.id)
+                .nodeWidth(20)
+                .nodePadding(10)
+                .extent([[20, 20], [width - 20, height - 20]]);
+            
+            // Transform data for D3
+            const graph = {
+                nodes: data.nodes.map(n => ({...n})),
+                links: data.links.map(l => ({...l}))
+            };
+            
+            // Generate Sankey layout
+            const {nodes, links} = sankey(graph);
+            
+            // Draw links
+            const link = svg.append('g')
+                .selectAll('.link')
+                .data(links)
+                .join('path')
+                .attr('class', 'link')
+                .attr('d', d3.sankeyLinkHorizontal())
+                .attr('stroke', d => LEVEL_COLORS[d.source.level])
+                .attr('stroke-width', d => Math.max(1, d.width))
+                .on('mouseover', function(event, d) {
+                    showTooltip(event, `
+                        <strong>${d.source.name} → ${d.target.name}</strong><br>
+                        Energy: ${d.value.toLocaleString()} kWh<br>
+                        ${d.percentage}% of ${d.source.name}
+                    `);
+                    d3.select(this).attr('stroke-opacity', 0.6);
+                })
+                .on('mouseout', function() {
+                    hideTooltip();
+                    d3.select(this).attr('stroke-opacity', 0.3);
+                });
+            
+            // Draw nodes
+            const node = svg.append('g')
+                .selectAll('.node')
+                .data(nodes)
+                .join('g')
+                .attr('class', 'node')
+                .attr('transform', d => `translate(${d.x0},${d.y0})`);
+            
+            // Node rectangles
+            node.append('rect')
+                .attr('height', d => d.y1 - d.y0)
+                .attr('width', sankey.nodeWidth())
+                .attr('fill', d => LEVEL_COLORS[d.level])
+                .attr('opacity', 0.9)
+                .on('mouseover', function(event, d) {
+                    const incomingEnergy = d.targetLinks.reduce((sum, l) => sum + l.value, 0);
+                    const outgoingEnergy = d.sourceLinks.reduce((sum, l) => sum + l.value, 0);
+                    
+                    showTooltip(event, `
+                        <strong>${d.name}</strong><br>
+                        Level: ${['Grid', 'Factory', 'Department', 'Machine'][d.level]}<br>
+                        ${incomingEnergy > 0 ? `Input: ${incomingEnergy.toLocaleString()} kWh<br>` : ''}
+                        ${outgoingEnergy > 0 ? `Output: ${outgoingEnergy.toLocaleString()} kWh` : ''}
+                    `);
+                    d3.select(this).attr('opacity', 1);
+                })
+                .on('mouseout', function() {
+                    hideTooltip();
+                    d3.select(this).attr('opacity', 0.9);
+                });
+            
+            // Node labels
+            node.append('text')
+                .attr('x', d => d.x0 < width / 2 ? sankey.nodeWidth() + 6 : -6)
+                .attr('y', d => (d.y1 - d.y0) / 2)
+                .attr('dy', '0.35em')
+                .attr('text-anchor', d => d.x0 < width / 2 ? 'start' : 'end')
+                .text(d => d.name)
+                .attr('fill', '#2d3748');
+        }
+        
+        // ====================================================================
+        // TOOLTIP FUNCTIONS
+        // ====================================================================
+        
+        function showTooltip(event, html) {
+            const tooltip = document.getElementById('tooltip');
+            tooltip.innerHTML = html;
+            tooltip.style.opacity = 1;
+            tooltip.style.left = (event.pageX + 10) + 'px';
+            tooltip.style.top = (event.pageY - 10) + 'px';
+        }
+        
+        function hideTooltip() {
+            document.getElementById('tooltip').style.opacity = 0;
+        }
+    </script>
+    
+    <!-- EnMS Chatbot Widget (Rasa) -->
+    <script src="/js/chatbot-widget.js"></script>
+    
+    <!-- OVOS Voice Assistant Widget -->
+    <script src="/js/ovos-voice-widget.js?v=20260420a"></script>
+    
+    <!-- Sidebar Script -->
+    <script src="/js/sidebar.js?v=1765871462"></script>
+</body>
+</html>

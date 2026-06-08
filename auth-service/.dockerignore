@@ -1,0 +1,10 @@
+.git
+.env
+*.log
+*.pyc
+__pycache__/
+.pytest_cache/
+tests/
+email_templates/pilot_factory_*
+*.bak
+*.old

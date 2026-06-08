@@ -1,0 +1,36 @@
+# ============================================================================
+# EnMS - Factory Simulator Service
+# Python Dependencies
+# ============================================================================
+
+# Web Framework
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+pydantic==2.5.0
+pydantic-settings==2.1.0
+
+# MQTT Client
+paho-mqtt==1.6.1
+
+# Database
+psycopg2-binary==2.9.9
+asyncpg==0.29.0
+
+# Data Processing
+numpy==1.26.2
+pandas==2.1.3
+
+# Utilities
+python-dateutil==2.8.2
+pytz==2023.3
+
+# Logging
+python-json-logger==2.0.7
+
+# Configuration
+python-dotenv==1.0.0
+pyyaml==6.0.1
+
+# Async support
+aiofiles==23.2.1
+httpx==0.25.2

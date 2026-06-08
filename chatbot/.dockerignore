@@ -1,0 +1,14 @@
+.git
+.env
+*.log
+*.pyc
+__pycache__/
+.pytest_cache/
+node_modules/
+dist/
+tests/
+rasa/tests/
+rasa/models/components/
+rasa/models/metadata.json
+*.bak
+*.old

@@ -1,0 +1,8 @@
+# Ignore all files in this directory
+*
+
+# Except flows.json (we want to track this)
+!flows.json
+
+# And keep this .gitignore file
+!.gitignore

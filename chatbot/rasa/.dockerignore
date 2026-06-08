@@ -1,0 +1,11 @@
+.git
+.env
+*.log
+*.pyc
+__pycache__/
+.pytest_cache/
+tests/
+models/components/
+models/metadata.json
+*.bak
+*.old

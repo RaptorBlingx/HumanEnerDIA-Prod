@@ -1,0 +1,14 @@
+# Rasa Action Server Dockerfile
+FROM rasa/rasa-sdk:3.6.2
+
+WORKDIR /app
+
+# Copy actions code and data
+COPY actions/ /app/actions/
+COPY qa_data.json /app/qa_data.json
+
+# Expose action server port
+EXPOSE 5055
+
+# Run action server
+CMD ["start", "--actions", "actions"]

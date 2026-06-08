@@ -1,0 +1,21 @@
+# Node-RED credentials file (contains passwords and sensitive data)
+# DO NOT commit this file to Git
+data/flows_cred.json
+
+# Node-RED runtime generated files
+data/.config.*
+data/.npm/
+data/node_modules/
+data/lib/
+data/projects/
+data/package-lock.json
+
+# Keep the flows.json file tracked in Git
+!data/flows.json
+
+# NPM logs
+npm-debug.log
+
+# Old files (legacy structure)
+flows/
+flows_cred.json

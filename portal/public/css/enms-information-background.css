@@ -1,0 +1,180 @@
+/* 
+  -  Information Pages - Background Design
+  -  Shared across public information and authentication pages
+
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image: repeating-linear-gradient(
+      0deg,
+      transparent 0px,
+      transparent 49px,
+      rgba(0, 255, 170, 0.08) 49px,
+      rgba(0, 255, 170, 0.08) 50px,
+      transparent 50px,
+      transparent 99px,
+      rgba(0, 255, 170, 0.12) 99px,
+      rgba(0, 255, 170, 0.12) 100px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent 0px,
+      transparent 49px,
+      rgba(0, 168, 232, 0.08) 49px,
+      rgba(0, 168, 232, 0.08) 50px,
+      transparent 50px,
+      transparent 99px,
+      rgba(0, 168, 232, 0.12) 99px,
+      rgba(0, 168, 232, 0.12) 100px
+    ),
+    repeating-linear-gradient(
+      45deg,
+      transparent 0px,
+      transparent 48px,
+      rgba(255, 215, 0, 0.06) 48px,
+      rgba(255, 215, 0, 0.06) 50px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      transparent 0px,
+      transparent 48px,
+      rgba(102, 126, 234, 0.05) 48px,
+      rgba(102, 126, 234, 0.05) 50px
+    ),
+    radial-gradient(
+      circle at 15% 20%,
+      rgba(255, 215, 0, 0.35) 5px,
+      rgba(255, 215, 0, 0.15) 8px,
+      rgba(255, 215, 0, 0.05) 12px,
+      transparent 18px
+    ),
+    radial-gradient(
+      circle at 85% 25%,
+      rgba(0, 255, 170, 0.35) 6px,
+      rgba(0, 255, 170, 0.15) 9px,
+      rgba(0, 255, 170, 0.05) 13px,
+      transparent 20px
+    ),
+    radial-gradient(
+      circle at 30% 65%,
+      rgba(0, 168, 232, 0.3) 5px,
+      rgba(0, 168, 232, 0.15) 8px,
+      rgba(0, 168, 232, 0.05) 12px,
+      transparent 18px
+    ),
+    radial-gradient(
+      circle at 75% 70%,
+      rgba(102, 126, 234, 0.3) 6px,
+      rgba(102, 126, 234, 0.15) 9px,
+      rgba(102, 126, 234, 0.05) 13px,
+      transparent 20px
+    ),
+    radial-gradient(
+      circle at 50% 50%,
+      rgba(255, 215, 0, 0.4) 7px,
+      rgba(255, 215, 0, 0.2) 11px,
+      rgba(255, 215, 0, 0.08) 16px,
+      transparent 24px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      transparent 0px,
+      transparent 24px,
+      rgba(255, 255, 255, 0.02) 24px,
+      rgba(255, 255, 255, 0.02) 25px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent 0px,
+      transparent 24px,
+      rgba(255, 255, 255, 0.02) 24px,
+      rgba(255, 255, 255, 0.02) 25px
+    );
+  background-size: 100px 100px, 100px 100px, 100px 100px, 100px 100px,
+    1200px 1200px, 1100px 1100px, 1300px 1300px, 1200px 1200px, 1400px 1400px,
+    25px 25px, 25px 25px;
+  background-position: 0 0, 0 0, 0 0, 0 0, 15% 20%, 85% 25%, 30% 65%, 75% 70%,
+    50% 50%, 0 0, 0 0;
+  animation: energyPulse 10s ease-in-out infinite;
+}
+
+@keyframes energyPulse {
+  0%,
+  100% {
+    opacity: 1;
+    background-size: 100px 100px, 100px 100px, 100px 100px, 100px 100px,
+      1200px 1200px, 1100px 1100px, 1300px 1300px, 1200px 1200px, 1400px 1400px,
+      25px 25px, 25px 25px;
+  }
+  50% {
+    opacity: 0.85;
+    background-size: 100px 100px, 100px 100px, 100px 100px, 100px 100px,
+      1260px 1260px, 1160px 1160px, 1360px 1360px, 1260px 1260px, 1460px 1460px,
+      25px 25px, 25px 25px;
+  }
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 0;
+  background: radial-gradient(
+      ellipse 700px 500px at 5% 15%,
+      rgba(255, 215, 0, 0.15) 0%,
+      rgba(255, 215, 0, 0.08) 25%,
+      transparent 50%
+    ),
+    radial-gradient(
+      ellipse 650px 550px at 95% 20%,
+      rgba(0, 255, 170, 0.16) 0%,
+      rgba(0, 255, 170, 0.08) 25%,
+      transparent 50%
+    ),
+    radial-gradient(
+      ellipse 600px 600px at 25% 75%,
+      rgba(0, 168, 232, 0.12) 0%,
+      rgba(0, 168, 232, 0.06) 30%,
+      transparent 50%
+    ),
+    radial-gradient(
+      ellipse 700px 500px at 90% 85%,
+      rgba(102, 126, 234, 0.14) 0%,
+      rgba(102, 126, 234, 0.07) 25%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle 500px at 50% 50%,
+      rgba(0, 168, 232, 0.06) 0%,
+      transparent 60%
+    );
+  animation: glowShift 15s ease-in-out infinite;
+}
+
+@keyframes glowShift {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+header,
+.container,
+footer {
+  position: relative;
+  z-index: 10;
+} 
+*/

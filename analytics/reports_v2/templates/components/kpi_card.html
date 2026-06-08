@@ -1,0 +1,43 @@
+<!-- KPI Card Component Template -->
+<div class="kpi-card no-break" style="border-left-color: {{ border_color | default('#00A8E8') }};">
+    <div class="kpi-card-header" style="display: flex; align-items: center; margin-bottom: 0.5rem;">
+        {% if icon %}
+        <span class="kpi-card-icon" style="font-size: 1.5rem; margin-right: 0.5rem;">{{ icon }}</span>
+        {% endif %}
+        
+        <h3 class="kpi-card-title">{{ title }}</h3>
+    </div>
+    
+    {% if subtitle %}
+    <p class="kpi-card-subtitle" style="font-size: 0.75rem; color: #718096; margin: 0.25rem 0 0.5rem 0;">
+        {{ subtitle }}
+    </p>
+    {% endif %}
+    
+    <div class="kpi-card-content" style="margin: 0.75rem 0;">
+        <span class="kpi-card-value">{{ value | format_number }}</span>
+        {% if unit %}
+        <span class="kpi-card-unit">{{ unit }}</span>
+        {% endif %}
+    </div>
+    
+    {% if trend is not none %}
+    <div class="kpi-card-trend {{ 'positive' if trend >= 0 else 'negative' }}">
+        <span class="trend-arrow">{{ '▲' if trend >= 0 else '▼' }}</span>
+        <span class="trend-value">{{ trend | format_percent(1) }}</span>
+        {% if trend_label %}
+        <span class="trend-label" style="margin-left: 0.25rem; color: #718096;">{{ trend_label }}</span>
+        {% endif %}
+    </div>
+    {% endif %}
+    
+    {% if target %}
+    {% set progress = (value / target * 100) if target > 0 else 0 %}
+    <div class="progress-bar" style="margin-top: 0.75rem;">
+        <div class="progress-bar-fill" style="width: {{ progress }}%; background-color: {{ border_color | default('#00A8E8') }};"></div>
+    </div>
+    <p style="font-size: 0.75rem; color: #718096; margin-top: 0.25rem; margin-bottom: 0;">
+        {{ progress | format_number(1) }}% of target ({{ target | format_number }} {{ unit }})
+    </p>
+    {% endif %}
+</div>

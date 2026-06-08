@@ -1,0 +1,68 @@
+<!-- Report Footer Component -->
+<footer class="report-footer no-break" style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--color-gray-light);">
+    <div class="footer-content" style="display: flex; justify-content: space-between; align-items: center; font-size: var(--font-small); color: var(--color-gray-medium);">
+        
+        <!-- Left: Generation Info -->
+        <div class="footer-left">
+            <div class="generation-info">
+                {% if generated_at %}
+                <span class="footer-label">Generated:</span>
+                <span class="footer-value">{{ generated_at }}</span>
+                {% endif %}
+                
+                {% if generated_by %}
+                <span style="margin-left: 1rem;">|</span>
+                <span class="footer-label" style="margin-left: 1rem;">By:</span>
+                <span class="footer-value">{{ generated_by }}</span>
+                {% endif %}
+            </div>
+            
+            <!-- ISO Compliance Note -->
+            {% if show_iso_compliance %}
+            <div class="iso-compliance" style="margin-top: 0.25rem; font-size: var(--font-micro); color: var(--color-gray-medium);">
+                <span style="font-weight: 600;">ISO 50001:2018</span> Energy Management System Compliant
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Center: Optional Custom Content -->
+        <div class="footer-center">
+            {% block footer_center %}{% endblock %}
+        </div>
+        
+        <!-- Right: Page Numbers -->
+        <div class="footer-right">
+            {% if show_page_numbers %}
+            <div class="page-number" style="font-weight: 600; color: var(--color-navy);">
+                <span class="page-label">Page</span>
+                <span class="current-page" id="page-number"></span>
+                {% if total_pages %}
+                <span class="page-separator">of</span>
+                <span class="total-pages">{{ total_pages }}</span>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Optional: Confidentiality Notice -->
+    {% if show_confidential %}
+    <div class="confidential-notice" style="margin-top: 0.5rem; padding: 0.5rem; background: #fff3cd; border-left: 3px solid var(--color-warning); font-size: var(--font-micro);">
+        <strong>CONFIDENTIAL:</strong> This document contains proprietary information. Unauthorized distribution is prohibited.
+    </div>
+    {% endif %}
+</footer>
+
+<!-- Page numbering script (for Playwright) -->
+<script>
+    // This will be executed during PDF generation
+    // Playwright can inject page numbers using CSS counters or JavaScript
+    if (typeof window !== 'undefined') {
+        window.addEventListener('load', function() {
+            const pageNumberElement = document.getElementById('page-number');
+            if (pageNumberElement && typeof window.pageNumber !== 'undefined') {
+                pageNumberElement.textContent = window.pageNumber;
+            }
+        });
+    }
+</script>

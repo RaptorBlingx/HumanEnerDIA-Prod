@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anomaly Heatmap | EnMS</title>
+    
+    <!-- Google Fonts - Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Industrial Design System -->
+    <link rel="stylesheet" href="/css/enms-industrial.css">
+    
+    <!-- Sidebar Component -->
+    <link rel="stylesheet" href="/css/sidebar.css?v=1765871462">
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
+    <!-- OVOS Voice Widget CSS -->
+    <link rel="stylesheet" href="/css/ovos-voice-widget.css?v=20260108f">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-matrix@2.0.1/dist/chartjs-chart-matrix.min.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background-color: #f8fafc;
+            min-height: 100vh;
+        }
+        
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 64px 40px 80px;
+        }
+        
+        .controls-panel {
+            background: white;
+            border-radius: 16px;
+            padding: 32px 40px;
+            margin-bottom: 48px;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        
+        .controls-panel label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #374151;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .controls-panel input,
+        .controls-panel button,
+        .controls-panel .btn-group {
+            border-radius: 12px;
+        }
+        
+        .controls-panel input {
+            padding: 16px 20px;
+            border: 2px solid #e5e7eb;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .controls-panel input:focus {
+            outline: none;
+            border-color: #00A8E8;
+            box-shadow: 0 0 0 3px rgba(0, 168, 232, 0.1);
+        }
+        
+        .controls-panel button.btn-primary {
+            background: linear-gradient(135deg, #0A2463 0%, #00A8E8 100%);
+            color: white;
+            border: none;
+            padding: 16px 20px;
+            font-weight: 600;
+        }
+        
+        .controls-panel button.btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(10, 36, 99, 0.4);
+        }
+        
+        .metric-card {
+            text-align: center;
+            padding: 24px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            border-radius: 16px;
+            border: 1px solid #e5e7eb;
+            transition: all 0.3s ease;
+        }
+        
+        .metric-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+        }
+        
+        .metric-card .icon {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 16px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .metric-card h3 {
+            font-size: 42px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            line-height: 1;
+        }
+        
+        .metric-card p {
+            font-size: 13px;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        .chart-container {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            margin-bottom: 32px;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        
+        .patterns-panel {
+            background: rgba(243, 156, 18, 0.1);
+            border-left: 4px solid #0A2463;
+            border-radius: 16px;
+            padding: 24px 32px;
+            margin-bottom: 32px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        
+        .patterns-panel h5 {
+            color: #0A2463;
+            margin-bottom: 16px;
+            font-weight: 700;
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .pattern-item {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .pattern-item i {
+            color: var(--color-warning);
+            margin-right: 0.5rem;
+        }
+        
+        .loading-spinner {
+            text-align: center;
+            padding: 4rem;
+        }
+        
+        .spinner-border {
+            width: 4rem;
+            height: 4rem;
+            color: var(--color-primary);
+        }
+        
+        .btn-group-toggle .btn {
+            padding: 0.5rem 1.5rem;
+        }
+        
+        .btn-group-toggle .btn.active {
+            background: var(--color-primary);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <!-- Hamburger Menu Header -->
+    <header class="industrial-header" style="padding: 1rem 2rem;">
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 1rem; width: 100%;">
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <button onclick="toggleSidebar()" class="hamburger-btn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
+                <a href="/" class="industrial-logo" style="display: flex; align-items: center; gap: 0.5rem; color: white; text-decoration: none;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                    </svg>
+                    <span>HumanEnerDIA</span>
+                </a>
+            </div>
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <!-- Notification Bell -->
+                <div class="notification-bell-container">
+                    <button id="notification-bell" class="notification-bell-btn" onclick="toggleNotificationPanel()" title="Notifications">
+                        <i class="bi bi-bell-fill"></i>
+                        <span id="notification-badge" class="notification-badge" style="display: none;"></span>
+                    </button>
+                    <div id="notification-panel" class="notification-panel" style="display: none;">
+                        <div class="notification-panel-header">
+                            <h3><i class="bi bi-bell"></i> Notifications</h3>
+                            <button onclick="clearAllNotifications()" class="clear-all-btn" title="Clear all">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                        <div id="notification-list" class="notification-list">
+                            <div class="notification-empty">
+                                <i class="bi bi-bell-slash"></i>
+                                <p>No notifications yet</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button id="ovos-enable-voice-nav" style="display: none; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 10px 20px; border-radius: 25px; cursor: pointer; font-weight: 500; align-items: center; gap: 8px; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                        <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                    </svg>
+                    <span>Enable Voice</span>
+                </button>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Sidebar will be injected by sidebar.js -->
+
+    <!-- Hero Section - Premium Design -->
+    <section style="background: linear-gradient(135deg, #0A2463 0%, #1E3A8A 50%, #00A8E8 100%); 
+                    color: white; 
+                    padding: 80px 0; 
+                    position: relative;
+                    overflow: hidden;">
+        <!-- Subtle pattern overlay -->
+        <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; 
+                    background-image: radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.05) 0%, transparent 50%),
+                                      radial-gradient(circle at 80% 80%, rgba(0, 168, 232, 0.1) 0%, transparent 50%);
+                    pointer-events: none;"></div>
+        
+        <div style="position: relative; z-index: 1; max-width: 1400px; margin: 0 auto; text-align: center; padding: 0 40px;">
+            <h1 style="font-size: 56px; 
+                       font-weight: 700; 
+                       margin-bottom: 24px; 
+                       line-height: 1.2;
+                       letter-spacing: -0.02em;
+                       color: #FFFFFF;
+                       text-shadow: 0 2px 8px rgba(0,0,0,0.3), 0 4px 16px rgba(0,0,0,0.2);">
+                <i class="bi bi-grid-3x3-gap" style="margin-right: 16px;"></i>
+                Anomaly Pattern Heatmap
+            </h1>
+            <p style="font-size: 22px; 
+                     color: #FFFFFF; 
+                     margin-bottom: 0;
+                     line-height: 1.6;
+                     font-weight: 400;
+                     max-width: 700px;
+                     margin: 0 auto;
+                     text-shadow: 0 1px 4px rgba(0,0,0,0.3);">
+                Identify when and where anomalies occur most frequently across your facility
+            </p>
+        </div>
+    </section>
+
+    <div class="main-container">
+        <!-- Controls Panel -->
+        <div class="controls-panel">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label"><strong>View Type</strong></label>
+                    <div class="btn-group w-100" role="group">
+                        <input type="radio" class="btn-check" name="view-type" id="hourly-view" value="hourly" checked>
+                        <label class="btn btn-outline-primary" for="hourly-view">Hourly</label>
+                        
+                        <input type="radio" class="btn-check" name="view-type" id="daily-view" value="daily">
+                        <label class="btn btn-outline-primary" for="daily-view">Daily</label>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label"><strong>Start Date</strong></label>
+                    <input type="date" id="start-date" class="form-control">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label"><strong>End Date</strong></label>
+                    <input type="date" id="end-date" class="form-control">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label"><strong>Min Severity</strong></label>
+                    <input type="number" id="min-severity" class="form-control" value="0" min="0" max="1" step="0.1">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label"><strong>&nbsp;</strong></label>
+                    <button class="btn btn-primary w-100" onclick="loadHeatmapData()">
+                        <i class="bi bi-arrow-repeat"></i> Update
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Metrics Row -->
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; margin-bottom: 48px;" id="metrics-row">
+            <div class="metric-card">
+                <div class="icon" style="background: linear-gradient(135deg, #FF6B35 0%, #D94D1A 100%); box-shadow: 0 4px 14px rgba(255, 107, 53, 0.4);">
+                    <svg width="24" height="24" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                    </svg>
+                </div>
+                <h3 id="total-anomalies" style="color: #FF6B35;">-</h3>
+                <p>Total Anomalies</p>
+            </div>
+            <div class="metric-card">
+                <div class="icon" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); box-shadow: 0 4px 14px rgba(240, 147, 251, 0.4);">
+                    <svg width="24" height="24" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                    </svg>
+                </div>
+                <h3 id="max-count" style="color: #f5576c;">-</h3>
+                <p>Peak Count (Single Cell)</p>
+            </div>
+            <div class="metric-card">
+                <div class="icon" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); box-shadow: 0 4px 14px rgba(79, 172, 254, 0.4);">
+                    <svg width="24" height="24" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                </div>
+                <h3 id="date-range" style="color: #00A8E8;">-</h3>
+                <p>Analysis Period</p>
+            </div>
+        </div>
+        
+        <!-- Patterns Panel -->
+        <div class="patterns-panel" id="patterns-panel" style="display: none;">
+            <h5>
+                <i class="bi bi-lightbulb"></i>
+                Identified Patterns
+            </h5>
+            <div id="patterns-list"></div>
+        </div>
+        
+        <!-- Heatmap Chart -->
+        <div class="chart-container">
+            <canvas id="heatmap-chart"></canvas>
+        </div>
+    </div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // ====================================================================
+        // CONFIGURATION
+        // ====================================================================
+        
+            // API Base URL - detect if accessed through nginx proxy or directly
+            const API_BASE = window.location.port === '8001' ? '/api/v1' : '/api/analytics/api/v1';
+            const API_BASE_URL = `${API_BASE}/heatmap`;
+        let heatmapChart = null;
+        
+        // ====================================================================
+        // INITIALIZATION
+        // ====================================================================
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set default date range (last 30 days)
+            const endDate = new Date();
+            const startDate = new Date();
+            startDate.setDate(startDate.getDate() - 30);
+            
+            document.getElementById('end-date').valueAsDate = endDate;
+            document.getElementById('start-date').valueAsDate = startDate;
+            
+            // Listen for view type changes
+            document.querySelectorAll('input[name="view-type"]').forEach(radio => {
+                radio.addEventListener('change', loadHeatmapData);
+            });
+            
+            // Load initial data
+            loadHeatmapData();
+        });
+        
+        // ====================================================================
+        // DATA LOADING
+        // ====================================================================
+        
+        async function loadHeatmapData() {
+            try {
+                // Get parameters
+                const viewType = document.querySelector('input[name="view-type"]:checked').value;
+                const startDate = document.getElementById('start-date').value;
+                const endDate = document.getElementById('end-date').value;
+                const minSeverity = document.getElementById('min-severity').value;
+                
+                // Build query string
+                const params = new URLSearchParams({
+                    start_date: startDate + 'T00:00:00Z',
+                    end_date: endDate + 'T23:59:59Z',
+                    min_severity: minSeverity
+                });
+                
+                // Show loading
+                const chartCanvas = document.getElementById('heatmap-chart');
+                const ctx = chartCanvas.getContext('2d');
+                ctx.clearRect(0, 0, chartCanvas.width, chartCanvas.height);
+                
+                // Fetch data
+                const endpoint = viewType === 'hourly' ? 'hourly' : 'daily';
+                const response = await fetch(`${API_BASE_URL}/${endpoint}?${params}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                // Update metrics
+                updateMetrics(data);
+                
+                // Update patterns
+                updatePatterns(data.patterns);
+                
+                // Draw heatmap
+                drawHeatmap(data);
+                
+            } catch (error) {
+                console.error('Error loading heatmap data:', error);
+                alert('Error loading heatmap data: ' + error.message);
+            }
+        }
+        
+        // ====================================================================
+        // METRICS UPDATE
+        // ====================================================================
+        
+        function updateMetrics(data) {
+            document.getElementById('total-anomalies').textContent = data.total_anomalies.toLocaleString();
+            document.getElementById('max-count').textContent = data.max_count.toLocaleString();
+            
+            const start = new Date(data.start_date).toLocaleDateString();
+            const end = new Date(data.end_date).toLocaleDateString();
+            document.getElementById('date-range').textContent = `${start} - ${end}`;
+        }
+        
+        // ====================================================================
+        // PATTERNS UPDATE
+        // ====================================================================
+        
+        function updatePatterns(patterns) {
+            const patternsPanel = document.getElementById('patterns-panel');
+            const patternsList = document.getElementById('patterns-list');
+            
+            if (patterns.length > 0) {
+                patternsPanel.style.display = 'block';
+                patternsList.innerHTML = patterns.map(pattern => `
+                    <div class="pattern-item">
+                        <i class="bi bi-info-circle"></i>
+                        ${pattern}
+                    </div>
+                `).join('');
+            } else {
+                patternsPanel.style.display = 'none';
+            }
+        }
+        
+        // ====================================================================
+        // HEATMAP RENDERING
+        // ====================================================================
+        
+        function drawHeatmap(data) {
+            const ctx = document.getElementById('heatmap-chart').getContext('2d');
+            
+            // Destroy existing chart
+            if (heatmapChart) {
+                heatmapChart.destroy();
+            }
+            
+            // Transform data for Chart.js matrix
+            const matrixData = data.cells.map(cell => ({
+                x: cell.x,
+                y: cell.y,
+                v: cell.value
+            }));
+            
+            // Create heatmap
+            heatmapChart = new Chart(ctx, {
+                type: 'matrix',
+                data: {
+                    datasets: [{
+                        label: 'Anomaly Count',
+                        data: matrixData,
+                        backgroundColor: function(context) {
+                            const value = context.dataset.data[context.dataIndex]?.v || 0;
+                            const intensity = value / data.max_count;
+                            
+                            // Color gradient from light to dark red
+                            const r = 220;
+                            const g = Math.floor(220 - (180 * intensity));
+                            const b = Math.floor(220 - (180 * intensity));
+                            
+                            return `rgba(${r}, ${g}, ${b}, ${0.3 + intensity * 0.7})`;
+                        },
+                        borderColor: '#ccc',
+                        borderWidth: 1,
+                        width: ({chart}) => (chart.chartArea || {}).width / data.x_labels.length - 2,
+                        height: ({chart}) => (chart.chartArea || {}).height / data.y_labels.length - 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                title: function() {
+                                    return '';
+                                },
+                                label: function(context) {
+                                    const cell = data.cells.find(c => 
+                                        c.x === context.raw.x && c.y === context.raw.y
+                                    );
+                                    
+                                    if (cell) {
+                                        return [
+                                            `Machine: ${cell.x}`,
+                                            `Time: ${cell.y}`,
+                                            `Anomalies: ${cell.value}`,
+                                            `Avg Severity: ${cell.severity_avg.toFixed(2)}`
+                                        ];
+                                    }
+                                    return '';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            type: 'category',
+                            labels: data.x_labels,
+                            title: {
+                                display: true,
+                                text: 'Machine'
+                            },
+                            ticks: {
+                                maxRotation: 45,
+                                minRotation: 45
+                            }
+                        },
+                        y: {
+                            type: 'category',
+                            labels: data.y_labels,
+                            title: {
+                                display: true,
+                                text: document.querySelector('input[name="view-type"]:checked').value === 'hourly' ? 'Hour of Day' : 'Day of Week'
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Set chart height
+            document.getElementById('heatmap-chart').style.height = Math.max(400, data.y_labels.length * 30) + 'px';
+        }
+    </script>
+    
+    <!-- EnMS Chatbot Widget (Rasa) -->
+    <script src="/js/chatbot-widget.js"></script>
+    
+    <!-- OVOS Voice Assistant Widget -->
+    <script src="/js/ovos-voice-widget.js?v=20260420a"></script>
+    
+    <!-- Sidebar Script -->
+    <script src="/js/sidebar.js?v=1765871462"></script>
+</body>
+</html>

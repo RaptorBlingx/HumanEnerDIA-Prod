@@ -1,0 +1,283 @@
+<!-- Cost Analysis Section -->
+<div class="section cost-analysis" style="padding: 2rem; page-break-after: always;">
+    <!-- Section Header -->
+    <div style="margin-bottom: 2rem; border-bottom: 3px solid #48bb78; padding-bottom: 1rem;">
+        <h1 style="font-size: 32px; font-weight: 700; color: #1a365d; margin: 0 0 0.5rem 0;">
+            Cost Analysis
+        </h1>
+        <p style="font-size: 14px; color: #718096; margin: 0;">
+            Energy cost breakdown and optimization opportunities for {{ period_name }}
+        </p>
+    </div>
+    
+    <!-- Key Metrics -->
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; margin-bottom: 2rem;">
+        <!-- Total Cost -->
+        <div style="
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            border-radius: 12px;
+            padding: 2rem;
+            color: white;
+        ">
+            <div style="font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.9; margin-bottom: 1rem;">
+                Total Energy Cost
+            </div>
+            <div style="font-size: 36px; font-weight: 700; margin-bottom: 0.5rem;">
+                {{ total_cost }}
+            </div>
+            <div style="font-size: 14px; opacity: 0.9;">
+                {% if cost_positive %}↓{% else %}↑{% endif %} {{ cost_change_pct|round(1) }}% vs previous
+            </div>
+        </div>
+        
+        <!-- Budget Status -->
+        <div style="background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 2rem;">
+            <div style="font-size: 12px; font-weight: 600; text-transform: uppercase; color: #718096; margin-bottom: 1rem;">
+                Budget Status
+            </div>
+            <div style="font-size: 36px; font-weight: 700; color: {% if over_budget %}#e53e3e{% else %}#48bb78{% endif %}; margin-bottom: 0.5rem;">
+                {{ budget }}
+            </div>
+            <div style="font-size: 14px; color: {% if over_budget %}#e53e3e{% else %}#48bb78{% endif %};">
+                {% if over_budget %}+{% else %}−{% endif %}{{ budget_variance }} ({{ budget_variance_pct|round(1) }}%)
+            </div>
+        </div>
+        
+        <!-- Average Rate -->
+        <div style="background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 2rem;">
+            <div style="font-size: 12px; font-weight: 600; text-transform: uppercase; color: #718096; margin-bottom: 1rem;">
+                Average Rate
+            </div>
+            <div style="font-size: 36px; font-weight: 700; color: #1a365d; margin-bottom: 0.5rem;">
+                {{ avg_rate }}
+            </div>
+            <div style="font-size: 14px; color: #718096;">
+                per kWh
+            </div>
+        </div>
+        
+        <!-- Potential Savings -->
+        <div style="background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 2rem;">
+            <div style="font-size: 12px; font-weight: 600; text-transform: uppercase; color: #718096; margin-bottom: 1rem;">
+                Potential Savings
+            </div>
+            <div style="font-size: 36px; font-weight: 700; color: #48bb78; margin-bottom: 0.5rem;">
+                {{ potential_savings }}
+            </div>
+            <div style="font-size: 14px; color: #48bb78;">
+                {{ savings_pct|round(1) }}% of total
+            </div>
+        </div>
+    </div>
+    
+    <!-- Cost Breakdown Chart -->
+    {% if has_breakdown_chart %}
+    <div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.5rem; margin-bottom: 2rem;">
+        <h3 style="font-size: 18px; font-weight: 600; color: #1a365d; margin: 0 0 1rem 0;">
+            Cost Breakdown by Category
+        </h3>
+        <div style="width: 100%; max-width: 100%; overflow: hidden;">
+            {{ cost_breakdown_chart_html|safe }}
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Category Rankings -->
+    <div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.5rem; margin-bottom: 2rem;">
+        <h3 style="font-size: 18px; font-weight: 600; color: #1a365d; margin: 0 0 1rem 0;">
+            Cost by Category
+        </h3>
+        
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="border-bottom: 2px solid #e2e8f0;">
+                    <th style="padding: 0.75rem; text-align: left; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #718096;">
+                        Category
+                    </th>
+                    <th style="padding: 0.75rem; text-align: right; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #718096;">
+                        Consumption
+                    </th>
+                    <th style="padding: 0.75rem; text-align: right; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #718096;">
+                        Cost
+                    </th>
+                    <th style="padding: 0.75rem; text-align: right; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #718096;">
+                        % of Total
+                    </th>
+                    <th style="padding: 0.75rem; text-align: right; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #718096;">
+                        Avg Rate
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for category in categories %}
+                <tr style="border-bottom: 1px solid #f7fafc;">
+                    <td style="padding: 1rem; font-weight: 600; color: #2d3748;">
+                        {{ category.name }}
+                    </td>
+                    <td style="padding: 1rem; text-align: right; color: #4a5568;">
+                        {{ category.kwh_formatted }} kWh
+                    </td>
+                    <td style="padding: 1rem; text-align: right; font-weight: 700; color: #1a365d;">
+                        {{ category.cost_formatted }}
+                    </td>
+                    <td style="padding: 1rem; text-align: right;">
+                        <div style="
+                            display: inline-block;
+                            padding: 0.25rem 0.75rem;
+                            background: #f7fafc;
+                            border-radius: 12px;
+                            font-weight: 600;
+                            font-size: 13px;
+                            color: #2d3748;
+                        ">
+                            {{ category.percentage|round(1) }}%
+                        </div>
+                    </td>
+                    <td style="padding: 1rem; text-align: right; color: #718096; font-size: 13px;">
+                        ${{ category.avg_rate|round(3) }}/kWh
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Peak vs Off-Peak Analysis -->
+    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; margin-bottom: 2rem; page-break-inside: avoid;">
+        <!-- Peak Hours -->
+        <div style="background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%); border-radius: 8px; padding: 1.5rem; color: white;">
+            <h3 style="font-size: 16px; font-weight: 600; margin: 0 0 1rem 0;">
+                Peak Hours
+            </h3>
+            <div style="display: grid; gap: 1rem;">
+                <div>
+                    <div style="font-size: 11px; opacity: 0.9; margin-bottom: 0.25rem;">Consumption</div>
+                    <div style="font-size: 24px; font-weight: 700;">{{ peak_kwh }} kWh</div>
+                </div>
+                <div>
+                    <div style="font-size: 11px; opacity: 0.9; margin-bottom: 0.25rem;">Cost</div>
+                    <div style="font-size: 24px; font-weight: 700;">{{ peak_cost }}</div>
+                </div>
+                <div>
+                    <div style="font-size: 11px; opacity: 0.9; margin-bottom: 0.25rem;">Rate</div>
+                    <div style="font-size: 24px; font-weight: 700;">{{ peak_rate }}/kWh</div>
+                </div>
+                <div style="border-top: 1px solid rgba(255, 255, 255, 0.3); padding-top: 1rem;">
+                    <div style="font-size: 13px; opacity: 0.9;">
+                        {{ peak_cost_pct|round(1) }}% of total cost
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Off-Peak Hours -->
+        <div style="background: linear-gradient(135deg, #48bb78 0%, #38a169 100%); border-radius: 8px; padding: 1.5rem; color: white;">
+            <h3 style="font-size: 16px; font-weight: 600; margin: 0 0 1rem 0;">
+                Off-Peak Hours
+            </h3>
+            <div style="display: grid; gap: 1rem;">
+                <div>
+                    <div style="font-size: 11px; opacity: 0.9; margin-bottom: 0.25rem;">Consumption</div>
+                    <div style="font-size: 24px; font-weight: 700;">{{ off_peak_kwh }} kWh</div>
+                </div>
+                <div>
+                    <div style="font-size: 11px; opacity: 0.9; margin-bottom: 0.25rem;">Cost</div>
+                    <div style="font-size: 24px; font-weight: 700;">{{ off_peak_cost }}</div>
+                </div>
+                <div>
+                    <div style="font-size: 11px; opacity: 0.9; margin-bottom: 0.25rem;">Rate</div>
+                    <div style="font-size: 24px; font-weight: 700;">{{ off_peak_rate }}/kWh</div>
+                </div>
+                <div style="border-top: 1px solid rgba(255, 255, 255, 0.3); padding-top: 1rem;">
+                    <div style="font-size: 13px; opacity: 0.9;">
+                        {{ off_peak_cost_pct|round(1) }}% of total cost
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Cost Trend Chart -->
+    {% if has_trend_chart %}
+    <div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.5rem; margin-bottom: 2rem;">
+        <h3 style="font-size: 18px; font-weight: 600; color: #1a365d; margin: 0 0 1rem 0;">
+            Cost Trend Over Time
+        </h3>
+        <div style="width: 100%; max-width: 100%; overflow: hidden;">
+            {{ cost_trend_chart_html|safe }}
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Tariff Comparison -->
+    {% if has_tariff_chart %}
+    <div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.5rem; margin-bottom: 2rem;">
+        <h3 style="font-size: 18px; font-weight: 600; color: #1a365d; margin: 0 0 1rem 0;">
+            Cost by Tariff Period
+        </h3>
+        {{ tariff_comparison_chart_html|safe }}
+    </div>
+    {% endif %}
+    
+    <!-- Savings Opportunities -->
+    {% if has_opportunities %}
+    <div style="background: linear-gradient(135deg, #48bb78 0%, #38a169 100%); border-radius: 8px; padding: 1.5rem; color: white;">
+        <h3 style="font-size: 18px; font-weight: 600; margin: 0 0 1rem 0;">
+            Cost Savings Opportunities ({{ opportunity_count }})
+        </h3>
+        
+        <div style="display: grid; gap: 0.75rem;">
+            {% for opp in savings_opportunities %}
+            <div style="background: rgba(255, 255, 255, 0.15); padding: 1rem; border-radius: 6px;">
+                <div style="display: flex; justify-content: between; align-items: start; margin-bottom: 0.5rem;">
+                    <div style="flex: 1;">
+                        <div style="font-weight: 600; font-size: 14px; margin-bottom: 0.25rem;">
+                            {{ opp.title }}
+                        </div>
+                        <div style="font-size: 13px; opacity: 0.95;">
+                            {{ opp.description }}
+                        </div>
+                    </div>
+                    <div style="
+                        background: rgba(255, 255, 255, 0.3);
+                        padding: 0.25rem 0.75rem;
+                        border-radius: 4px;
+                        font-size: 11px;
+                        font-weight: 600;
+                        white-space: nowrap;
+                        margin-left: 1rem;
+                    ">
+                        {{ opp.priority }}
+                    </div>
+                </div>
+                <div style="display: flex; gap: 2rem; margin-top: 0.75rem; font-size: 13px; font-weight: 600;">
+                    <div>💵 Savings: {{ opp.annual_savings }}</div>
+                    <div>Payback: {{ opp.payback_period }}</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Projection -->
+    <div style="background: #f7fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.5rem; margin-top: 2rem;">
+        <h3 style="font-size: 16px; font-weight: 600; color: #1a365d; margin: 0 0 1rem 0;">
+            Annual Projection
+        </h3>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem;">
+            <div>
+                <div style="font-size: 11px; color: #718096; margin-bottom: 0.5rem;">Projected Annual Cost</div>
+                <div style="font-size: 28px; font-weight: 700; color: #1a365d;">{{ projected_annual }}</div>
+            </div>
+            <div>
+                <div style="font-size: 11px; color: #718096; margin-bottom: 0.5rem;">Potential Annual Savings</div>
+                <div style="font-size: 28px; font-weight: 700; color: #48bb78;">{{ potential_savings }}</div>
+            </div>
+            <div>
+                <div style="font-size: 11px; color: #718096; margin-bottom: 0.5rem;">Optimized Annual Cost</div>
+                <div style="font-size: 28px; font-weight: 700; color: #4299e1;">{{ (total_cost_raw * 12 - (potential_savings|replace('$', '')|replace('K', '000')|replace('M', '000000')|float * 12))|round(0) }}</div>
+            </div>
+        </div>
+    </div>
+</div>

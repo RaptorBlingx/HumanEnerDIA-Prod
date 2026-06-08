@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About - HumanEnerDIA</title>
+    
+    <!-- Google Fonts - Inter (Professional) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Sidebar CSS -->
+    <link rel="stylesheet" href="/css/sidebar.css?v=20260115113000">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: url('/images/background.png') center center / cover no-repeat fixed,
+                        linear-gradient(135deg, #0A2463 0%, #1E3A8A 50%, #00A8E8 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Simplified Header with Logo and Hamburger Only */
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: rgba(10, 36, 99, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 0;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            border-bottom: 2px solid rgba(0, 168, 232, 0.3);
+        }
+
+        nav {
+            width: 100%;
+            padding: 0 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo svg {
+            flex-shrink: 0;
+        }
+
+        /* Main Content */
+        .container {
+            flex: 1;
+            max-width: 1000px;
+            margin: 3rem auto;
+            padding: 0 2rem;
+        }
+
+        .content-box {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 3rem;
+        }
+
+        h1 {
+            color: #0A2463;
+            margin-bottom: 1.5rem;
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+
+        h2 {
+            color: #1E3A8A;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+
+        p {
+            color: #333;
+            line-height: 1.8;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        ul {
+            margin: 1rem 0 1rem 2rem;
+        }
+
+        li {
+            color: #333;
+            line-height: 1.8;
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .feature-card {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 12px;
+            border-left: 4px solid #667eea;
+        }
+
+        .feature-card h3 {
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-card p {
+            font-size: 1rem;
+            color: #666;
+        }
+
+        footer {
+            background: linear-gradient(135deg, #0A2463 0%, #1E3A8A 100%);
+            color: white;
+            text-align: center;
+            padding: 1.5rem;
+            font-size: 0.9rem;
+            border-top: 2px solid rgba(0, 168, 232, 0.3);
+        }
+        
+        footer p {
+            color: white;
+            margin: 0;
+        }
+
+        @media (max-width: 768px) {
+            .content-box {
+                padding: 2rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
+</head>
+<body>
+    <!-- Simplified Header with Logo and Hamburger Only -->
+    <header>
+        <nav>
+            <div class="logo-section" style="padding: 0; padding-left: 5px;">
+                <button onclick="toggleSidebar()" class="hamburger-btn" style="margin: 0; margin-right: 0.5rem;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
+                <a href="/" class="logo">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                    </svg>
+                    HumanEnerDIA
+                </a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="content-box">
+            <h1>About HumanEnerDIA</h1>
+            
+            <p>
+                HumanEnerDIA (Human-Centric Intelligent Energy Management System with Digital Intelligent Assistant) is a comprehensive, production-ready solution designed for 
+                industrial facilities to monitor, analyze, and optimize their energy consumption in real-time.
+                HumanEnerDIA includes Digital Intelligent Assistance (DIA) interfaces: an OVOS voice assistant for hands-free queries and control over EnMS, and an AI chatbot that supports users with Energy Management System (EnMS) know-how and platform guidance.
+            </p>
+
+            <h2><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline-block; vertical-align: middle; margin-right: 8px;"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="3"></circle></svg>Mission</h2>
+            <p>
+                Our mission is to empower organizations with actionable insights into their energy usage, enabling them 
+                to reduce costs, improve efficiency, and meet sustainability goals while maintaining full compliance 
+                with ISO 50001 standards.
+                Through DIA, we add voice (OVOS) and an AI chatbot to make EnMS guidance and day-to-day actions faster and easier.
+            </p>
+
+            <h2><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline-block; vertical-align: middle; margin-right: 8px;"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>Key Features</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h3><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline-block; vertical-align: middle; margin-right: 6px;"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>Real-Time Monitoring</h3>
+                    <p>Live energy consumption data from industrial equipment with millisecond precision.</p>
+                </div>
+                <div class="feature-card">
+                    <h3><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline-block; vertical-align: middle; margin-right: 6px;"><circle cx="12" cy="12" r="3"></circle><path d="M12 1v6m0 6v6m-6-6h6m6 0h6"></path><circle cx="12" cy="12" r="10"></circle></svg>AI-Powered Analytics</h3>
+                    <p>Machine learning models for anomaly detection, forecasting, and baseline predictions.</p>
+                </div>
+                <div class="feature-card">
+                    <h3><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline-block; vertical-align: middle; margin-right: 6px;"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>Advanced Dashboards</h3>
+                    <p>Interactive Grafana dashboards with customizable KPIs and visualizations.</p>
+                </div>
+                <div class="feature-card">
+                    <h3><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline-block; vertical-align: middle; margin-right: 6px;"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>Smart Alerts</h3>
+                    <p>Automated notifications for anomalies, threshold breaches, and maintenance needs.</p>
+                </div>
+                <div class="feature-card">
+                    <h3><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline-block; vertical-align: middle; margin-right: 6px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>ISO 50001 Support</h3>
+                    <p>Built-in reporting and documentation aligned with ISO 50001 energy management principles.</p>
+                </div>
+                <div class="feature-card">
+                    <h3><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline-block; vertical-align: middle; margin-right: 6px;"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>Voice Integration</h3>
+                    <p>OVOS voice assistant for hands-free data queries and system control.</p>
+                </div>
+            </div>
+
+            <h2><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline-block; vertical-align: middle; margin-right: 8px;"><path d="M3 3v18h18"></path><path d="M18.5 9.5L12 16l-4-4L3 17"></path></svg>Architecture</h2>
+            <p>
+                ENMS Platform is built on a modern microservices architecture with:
+            </p>
+            <ul>
+                <li><strong>TimescaleDB:</strong> Time-series database optimized for IoT data</li>
+                <li><strong>FastAPI:</strong> High-performance Python APIs for analytics and queries</li>
+                <li><strong>Node-RED:</strong> Visual data pipeline for MQTT to database ETL</li>
+                <li><strong>Grafana:</strong> Professional-grade visualization and dashboards</li>
+                <li><strong>Redis:</strong> Real-time caching and pub/sub messaging</li>
+                <li><strong>Docker:</strong> Containerized deployment for scalability</li>
+                <li><strong>DIA Interfaces:</strong> OVOS voice assistant and an EnMS expert chatbot for guidance, queries, and workflow support.</li>
+            </ul>
+
+            <h2><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline-block; vertical-align: middle; margin-right: 8px;"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>Technology Stack</h2>
+            <p>
+                Our platform leverages cutting-edge technologies including Python, PostgreSQL, React, Docker, 
+                MQTT, and machine learning libraries (scikit-learn, Prophet, ARIMA) to deliver enterprise-grade 
+                energy management capabilities.
+            </p>
+
+            <h2><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline-block; vertical-align: middle; margin-right: 8px;"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>Environmental Impact</h2>
+            <p>
+                By providing detailed insights into energy consumption patterns and identifying optimization 
+                opportunities, ENMS Platform helps organizations significantly reduce their carbon footprint 
+                and contribute to global sustainability goals.
+            </p>
+
+            <h2><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline-block; vertical-align: middle; margin-right: 8px;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>Social Impact</h2>
+            <p>
+                By adding Digital Intelligent Assistance (DIA) to Intel50001, HumanEnerDIA lowers the skills and effort needed to run an Energy Management System—helping workers interact with complex energy data more easily and reducing the technical burden on operational users.
+            </p>
+            <p>
+                Through OVOS voice support and a text-based assistant connected to the EnMS knowledge base, the solution supports learning (standards, procedures, and practical EnMS know-how), increases engagement, and is designed to improve day-to-day usability and wellbeing in factory roles.
+            </p>
+            <p>
+                We also plan webinars/workshops to demonstrate real-world usage and broaden uptake among manufacturing SMEs.
+            </p>
+
+            <h2><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline-block; vertical-align: middle; margin-right: 8px;"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>Get Started</h2>
+            <p>
+                Ready to transform your energy management? <a href="/auth.html" style="color: #667eea; font-weight: bold;">Sign up now</a> 
+                to access the platform, or <a href="/contact.html" style="color: #667eea; font-weight: bold;">contact us</a> 
+                for a personalized demo.
+            </p>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <!-- Logo Section - Uniform containers with per-logo scaling for visual balance -->
+        <div style="display: flex; justify-content: center; align-items: center; margin-bottom: 24px; gap: 24px; flex-wrap: wrap;">
+            <div style="width: 180px; height: 70px; background: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                <img src="/images/aplus-logo.png" alt="APlus Engineering" style="max-width: 100%; max-height: 100%; object-fit: contain; transform: scale(1.6);">
+            </div>
+            <div style="width: 180px; height: 70px; background: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; padding: 10px 15px;">
+                <img src="/images/Logo-dih.green_.png" alt="GreeneDIH" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+            </div>
+            <div style="width: 180px; height: 70px; background: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; padding: 10px 15px;">
+                <img src="/images/wasabi-logo.png" alt="WASABI Project" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+            </div>
+            <div style="width: 180px; height: 70px; background: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; padding: 10px 15px;">
+                <img src="/images/EU-Flag.png" alt="European Union" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+            </div>
+        </div>
+        <p style="margin-bottom: 10px;">&copy; 2026 HumanEnerDIA - Powered by APlus Engineering. All rights reserved.</p>
+        <p style="font-size: 0.9em; opacity: 0.85;">This project has received funding from the Horizon Europe programme under the Grant Agreement No. 101092176</p>
+    </footer>
+
+    <!-- Sidebar Script -->
+    <script src="/js/sidebar.js?v=20260115113000"></script>
+</body>
+</html>

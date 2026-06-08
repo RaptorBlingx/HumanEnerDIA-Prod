@@ -1,0 +1,201 @@
+<!-- Machine Ranking - Top Energy Consumers -->
+<div class="section machine-ranking" style="padding: 2rem; page-break-after: always;">
+    <!-- Section Header -->
+    <div style="margin-bottom: 2rem; border-bottom: 3px solid #00A8E8; padding-bottom: 1rem;">
+        <h1 style="font-size: 32px; font-weight: 700; color: #1a365d; margin: 0 0 0.5rem 0;">
+            Machine Ranking
+        </h1>
+        <p style="font-size: 14px; color: #718096; margin: 0;">
+            Top {{ machine_count }} energy consumers for {{ period_name }}
+        </p>
+    </div>
+    
+    <!-- Summary Cards -->
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 2rem; page-break-inside: avoid;">
+        <!-- Top Consumer Highlight -->
+        {% if top_consumer %}
+        <div style="
+            background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
+            border-radius: 12px;
+            padding: 2rem;
+            color: white;
+        ">
+            <div style="font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.9; margin-bottom: 1rem;">
+                TOP CONSUMER
+            </div>
+            <div style="font-size: 24px; font-weight: 700; margin-bottom: 0.5rem;">
+                {{ top_consumer.name }}
+            </div>
+            <div style="font-size: 14px; opacity: 0.9; margin-bottom: 1.5rem;">
+                {{ top_consumer.type }}
+            </div>
+            <div style="border-top: 1px solid rgba(255, 255, 255, 0.3); padding-top: 1rem;">
+                <div style="font-size: 32px; font-weight: 700;">
+                    {{ top_consumer.consumption_formatted }}
+                </div>
+                <div style="font-size: 14px; opacity: 0.9;">
+                    kWh ({{ top_consumer.percentage|round(1) }}% of total)
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Total Monitored -->
+        <div style="background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 2rem;">
+            <div style="font-size: 12px; font-weight: 600; text-transform: uppercase; color: #718096; margin-bottom: 1rem;">
+                Machines Monitored
+            </div>
+            <div style="font-size: 48px; font-weight: 700; color: #1a365d; margin-bottom: 0.5rem;">
+                {{ machine_count }}
+            </div>
+            <div style="font-size: 14px; color: #718096;">
+                Active equipment units
+            </div>
+        </div>
+        
+        <!-- Total Consumption -->
+        <div style="background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 2rem;">
+            <div style="font-size: 12px; font-weight: 600; text-transform: uppercase; color: #718096; margin-bottom: 1rem;">
+                Total Consumption
+            </div>
+            <div style="font-size: 48px; font-weight: 700; color: #1a365d; margin-bottom: 0.5rem;">
+                {{ total_consumption }}
+            </div>
+            <div style="font-size: 14px; color: #718096;">
+                kWh total
+            </div>
+        </div>
+    </div>
+    
+    <!-- Ranking Chart -->
+    {% if has_ranking_chart %}
+    <div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.5rem; margin-bottom: 2rem; page-break-before: always; page-break-inside: avoid;">
+        <h3 style="font-size: 18px; font-weight: 600; color: #1a365d; margin: 0 0 1rem 0;">
+            Consumption Ranking
+        </h3>
+        <div style="width: 100%; max-width: 100%; overflow: hidden;">
+            {{ ranking_chart_html|safe }}
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Detailed Machine Table -->
+    <div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.5rem;">
+        <h3 style="font-size: 18px; font-weight: 600; color: #1a365d; margin: 0 0 1rem 0;">
+            Detailed Rankings
+        </h3>
+        
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="border-bottom: 2px solid #e2e8f0;">
+                    <th style="padding: 0.75rem; text-align: left; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #718096;">
+                        Rank
+                    </th>
+                    <th style="padding: 0.75rem; text-align: left; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #718096;">
+                        Machine
+                    </th>
+                    <th style="padding: 0.75rem; text-align: left; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #718096;">
+                        Type / Location
+                    </th>
+                    <th style="padding: 0.75rem; text-align: right; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #718096;">
+                        Consumption
+                    </th>
+                    <th style="padding: 0.75rem; text-align: right; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #718096;">
+                        % of Total
+                    </th>
+                    <th style="padding: 0.75rem; text-align: right; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #718096;">
+                        Cost
+                    </th>
+                    <th style="padding: 0.75rem; text-align: center; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #718096;">
+                        Efficiency
+                    </th>
+                    <th style="padding: 0.75rem; text-align: center; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #718096;">
+                        Status
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for machine in machines %}
+                <tr style="border-bottom: 1px solid #f7fafc;">
+                    <td style="padding: 1rem; font-weight: 700; font-size: 16px; color: #1a365d;">
+                        #{{ machine.rank }}
+                    </td>
+                    <td style="padding: 1rem;">
+                        <div style="font-weight: 600; color: #2d3748; font-size: 14px;">
+                            {{ machine.name }}
+                        </div>
+                        <div style="font-size: 11px; color: #a0aec0; margin-top: 0.25rem;">
+                            {{ machine.operating_hours }}h operating
+                        </div>
+                    </td>
+                    <td style="padding: 1rem;">
+                        <div style="font-size: 13px; color: #4a5568;">
+                            {{ machine.type }}
+                        </div>
+                        <div style="font-size: 11px; color: #a0aec0; margin-top: 0.25rem;">
+                            📍 {{ machine.location }}
+                        </div>
+                    </td>
+                    <td style="padding: 1rem; text-align: right;">
+                        <div style="font-weight: 700; font-size: 16px; color: #1a365d;">
+                            {{ machine.consumption_formatted }}
+                        </div>
+                        <div style="font-size: 11px; color: #718096;">
+                            kWh
+                        </div>
+                    </td>
+                    <td style="padding: 1rem; text-align: right;">
+                        <div style="
+                            display: inline-block;
+                            padding: 0.25rem 0.75rem;
+                            background: #f7fafc;
+                            border-radius: 12px;
+                            font-weight: 600;
+                            font-size: 13px;
+                            color: #2d3748;
+                        ">
+                            {{ machine.percentage|round(1) }}%
+                        </div>
+                    </td>
+                    <td style="padding: 1rem; text-align: right;">
+                        <div style="font-weight: 600; font-size: 14px; color: #e53e3e;">
+                            {{ machine.cost_formatted }}
+                        </div>
+                    </td>
+                    <td style="padding: 1rem; text-align: center;">
+                        <div style="
+                            display: inline-block;
+                            padding: 0.25rem 0.5rem;
+                            background: {% if machine.efficiency >= 90 %}#48bb78{% elif machine.efficiency >= 75 %}#4299e1{% elif machine.efficiency >= 60 %}#ed8936{% else %}#e53e3e{% endif %};
+                            color: white;
+                            border-radius: 4px;
+                            font-weight: 600;
+                            font-size: 12px;
+                        ">
+                            {{ machine.efficiency|round(0) }}%
+                        </div>
+                    </td>
+                    <td style="padding: 1rem; text-align: center;">
+                        <div style="
+                            display: inline-block;
+                            padding: 0.25rem 0.5rem;
+                            background: {{ machine.status_color }};
+                            color: white;
+                            border-radius: 4px;
+                            font-weight: 600;
+                            font-size: 11px;
+                        ">
+                            {{ machine.status }}
+                        </div>
+                        {% if machine.anomaly_count > 0 %}
+                        <div style="font-size: 10px; color: #e53e3e; margin-top: 0.25rem;">
+                            ⚠️ {{ machine.anomaly_count }} anomalies
+                        </div>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>

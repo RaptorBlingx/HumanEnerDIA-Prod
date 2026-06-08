@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anomaly Creator - Dev Tool</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .creator-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 30px;
+        }
+        .dev-badge {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a6f);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+        .info-icon {
+            color: #667eea;
+            cursor: help;
+            margin-left: 5px;
+        }
+        .form-label {
+            font-weight: 600;
+            color: #333;
+        }
+        .btn-create {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border: none;
+            padding: 12px 30px;
+            font-weight: 600;
+        }
+        .btn-create:hover {
+            background: linear-gradient(45deg, #764ba2, #667eea);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        .result-box {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+            display: none;
+        }
+        .result-box.success {
+            border-left-color: #28a745;
+            background: #d4edda;
+        }
+        .result-box.error {
+            border-left-color: #dc3545;
+            background: #f8d7da;
+        }
+        .quick-fill-btn {
+            font-size: 12px;
+            padding: 4px 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="creator-card">
+        <div class="text-center mb-4">
+            <span class="dev-badge">🛠️ DEVELOPMENT TOOL</span>
+            <h2 class="mt-2">Anomaly Creator</h2>
+            <p class="text-muted">Create test anomalies for UI development and testing</p>
+        </div>
+
+        <form id="anomalyForm">
+            <!-- Machine Selection -->
+            <div class="mb-3">
+                <label class="form-label">
+                    Machine
+                    <i class="bi bi-info-circle info-icon" 
+                       data-bs-toggle="tooltip" 
+                       data-bs-placement="right"
+                       title="Select which machine this anomaly belongs to. The machine must exist in your database."></i>
+                </label>
+                <select class="form-select" id="machineId" required>
+                    <option value="">Loading machines...</option>
+                </select>
+                <div class="form-text">If empty, make sure machines exist in the database</div>
+            </div>
+
+            <!-- Detection Time -->
+            <div class="mb-3">
+                <label class="form-label">
+                    Detection Time
+                    <i class="bi bi-info-circle info-icon" 
+                       data-bs-toggle="tooltip" 
+                       data-bs-placement="right"
+                       title="When this anomaly was detected. Defaults to current time. Use past times for testing historical data."></i>
+                </label>
+                <input type="datetime-local" class="form-control" id="detectedAt" required>
+                <div class="mt-2">
+                    <button type="button" class="btn btn-sm btn-outline-secondary quick-fill-btn" onclick="setTimeNow()">Now</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary quick-fill-btn" onclick="setTime(-1)">1 hour ago</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary quick-fill-btn" onclick="setTime(-24)">1 day ago</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary quick-fill-btn" onclick="setTime(-168)">1 week ago</button>
+                </div>
+            </div>
+
+            <!-- Anomaly Type -->
+            <div class="mb-3">
+                <label class="form-label">
+                    Anomaly Type
+                    <i class="bi bi-info-circle info-icon" 
+                       data-bs-toggle="tooltip" 
+                       data-bs-placement="right"
+                       title="Type of anomaly detected: spike (sudden increase), drop (sudden decrease), drift (gradual change), or unknown (general anomaly)."></i>
+                </label>
+                <select class="form-select" id="anomalyType" required>
+                    <option value="spike">Spike - Sudden increase in value</option>
+                    <option value="drop">Drop - Sudden decrease in value</option>
+                    <option value="drift">Drift - Gradual change over time</option>
+                    <option value="unknown" selected>Unknown - General anomaly</option>
+                </select>
+            </div>
+
+            <!-- Severity -->
+            <div class="mb-3">
+                <label class="form-label">
+                    Severity
+                    <i class="bi bi-info-circle info-icon" 
+                       data-bs-toggle="tooltip" 
+                       data-bs-placement="right"
+                       title="How serious is this anomaly? Critical requires immediate attention, warning is notable, normal is baseline/informational."></i>
+                </label>
+                <select class="form-select" id="severity" required>
+                    <option value="critical">🔴 Critical - Immediate action required</option>
+                    <option value="warning" selected>🟡 Warning - Notable anomaly</option>
+                    <option value="normal">⚪ Normal - Baseline/Informational</option>
+                </select>
+            </div>
+
+            <!-- Metric Name -->
+            <div class="mb-3">
+                <label class="form-label">
+                    Metric Name
+                    <i class="bi bi-info-circle info-icon" 
+                       data-bs-toggle="tooltip" 
+                       data-bs-placement="right"
+                       title="Which sensor or measurement showed the anomaly. Examples: temperature, pressure, vibration, current, power."></i>
+                </label>
+                <input type="text" class="form-control" id="metricName" placeholder="e.g., temperature, pressure, vibration">
+                <div class="mt-2">
+                    <button type="button" class="btn btn-sm btn-outline-secondary quick-fill-btn" onclick="setMetric('temperature', 85.5, 75.0)">Temperature</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary quick-fill-btn" onclick="setMetric('pressure', 125.0, 100.0)">Pressure</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary quick-fill-btn" onclick="setMetric('vibration', 45.0, 30.0)">Vibration</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary quick-fill-btn" onclick="setMetric('current', 15.5, 12.0)">Current</button>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Metric Value -->
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">
+                        Actual Value
+                        <i class="bi bi-info-circle info-icon" 
+                           data-bs-toggle="tooltip" 
+                           data-bs-placement="right"
+                           title="The actual measured value that was anomalous. This is what the sensor recorded."></i>
+                    </label>
+                    <input type="number" step="0.01" class="form-control" id="metricValue" placeholder="85.5">
+                </div>
+
+                <!-- Expected Value -->
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">
+                        Expected Value
+                        <i class="bi bi-info-circle info-icon" 
+                           data-bs-toggle="tooltip" 
+                           data-bs-placement="right"
+                           title="What the value should have been under normal conditions. Used to calculate deviation."></i>
+                    </label>
+                    <input type="number" step="0.01" class="form-control" id="expectedValue" placeholder="75.0">
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Deviation Percent -->
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">
+                        Deviation %
+                        <i class="bi bi-info-circle info-icon" 
+                           data-bs-toggle="tooltip" 
+                           data-bs-placement="right"
+                           title="How far off from normal (percentage). Auto-calculated if you provide actual and expected values. Higher = more abnormal."></i>
+                    </label>
+                    <input type="number" step="0.01" class="form-control" id="deviationPercent" placeholder="14.0">
+                    <div class="form-text">Leave empty to auto-calculate</div>
+                </div>
+
+                <!-- Confidence Score -->
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">
+                        Confidence Score
+                        <i class="bi bi-info-circle info-icon" 
+                           data-bs-toggle="tooltip" 
+                           data-bs-placement="right"
+                           title="How confident the ML model is that this is an anomaly (0-1). Higher = more certain. 0.8 means 80% confident."></i>
+                    </label>
+                    <input type="number" step="0.01" min="0" max="1" class="form-control" id="confidenceScore" value="0.85" placeholder="0.85">
+                </div>
+            </div>
+
+            <!-- Is Resolved -->
+            <div class="mb-4">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="isResolved">
+                    <label class="form-check-label" for="isResolved">
+                        Mark as Resolved
+                        <i class="bi bi-info-circle info-icon" 
+                           data-bs-toggle="tooltip" 
+                           data-bs-placement="right"
+                           title="Check this if the anomaly has been investigated and fixed. Uncheck for active/pending anomalies."></i>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="text-center">
+                <button type="submit" class="btn btn-primary btn-create btn-lg">
+                    <i class="bi bi-plus-circle"></i> Create Anomaly
+                </button>
+            </div>
+        </form>
+
+        <!-- Result Box -->
+        <div id="resultBox" class="result-box">
+            <h5 id="resultTitle"></h5>
+            <pre id="resultContent" style="white-space: pre-wrap; font-size: 12px;"></pre>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="mt-4 text-center">
+            <a href="/ui/anomaly" class="btn btn-outline-primary">
+                <i class="bi bi-arrow-left"></i> Go to Anomaly Page
+            </a>
+            <button type="button" class="btn btn-outline-secondary" onclick="location.reload()">
+                <i class="bi bi-arrow-clockwise"></i> Reset Form
+            </button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        // Initialize tooltips
+        document.addEventListener('DOMContentLoaded', function() {
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+
+            // Set default time to now
+            setTimeNow();
+
+            // Load machines
+            loadMachines();
+        });
+
+        // Time helper functions
+        function setTimeNow() {
+            const now = new Date();
+            document.getElementById('detectedAt').value = formatDateTimeLocal(now);
+        }
+
+        function setTime(hoursOffset) {
+            const date = new Date();
+            date.setHours(date.getHours() + hoursOffset);
+            document.getElementById('detectedAt').value = formatDateTimeLocal(date);
+        }
+
+        function formatDateTimeLocal(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            return `${year}-${month}-${day}T${hours}:${minutes}`;
+        }
+
+        // Metric helper function
+        function setMetric(name, value, expected) {
+            document.getElementById('metricName').value = name;
+            document.getElementById('metricValue').value = value;
+            document.getElementById('expectedValue').value = expected;
+            
+            // Auto-calculate deviation
+            const deviation = ((value - expected) / expected * 100).toFixed(2);
+            document.getElementById('deviationPercent').value = Math.abs(deviation);
+        }
+
+        // Load machines from API
+        async function loadMachines() {
+            try {
+                const response = await axios.get('/api/analytics/api/v1/machines');
+                const machines = response.data;
+                
+                const select = document.getElementById('machineId');
+                select.innerHTML = '<option value="">Select a machine...</option>';
+                
+                // Handle if response.data is array
+                if (Array.isArray(machines)) {
+                    machines.forEach(machine => {
+                        const option = document.createElement('option');
+                        option.value = machine.id;
+                        option.textContent = `${machine.name} (${machine.type})`;
+                        select.appendChild(option);
+                    });
+                } else {
+                    console.error('Response data:', machines);
+                    throw new Error('Invalid response format - expected array');
+                }
+            } catch (error) {
+                console.error('Error loading machines:', error);
+                const select = document.getElementById('machineId');
+                select.innerHTML = '<option value="">Error loading machines</option>';
+            }
+        }
+
+        // Handle form submission
+        document.getElementById('anomalyForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const resultBox = document.getElementById('resultBox');
+            const resultTitle = document.getElementById('resultTitle');
+            const resultContent = document.getElementById('resultContent');
+            
+            // Show loading
+            resultBox.style.display = 'block';
+            resultBox.className = 'result-box';
+            resultTitle.textContent = '⏳ Creating anomaly...';
+            resultContent.textContent = '';
+            
+            // Get form values
+            const machineId = document.getElementById('machineId').value;
+            const detectedAt = document.getElementById('detectedAt').value;
+            const anomalyType = document.getElementById('anomalyType').value;
+            const severity = document.getElementById('severity').value;
+            const metricName = document.getElementById('metricName').value || null;
+            const metricValue = document.getElementById('metricValue').value ? parseFloat(document.getElementById('metricValue').value) : null;
+            const expectedValue = document.getElementById('expectedValue').value ? parseFloat(document.getElementById('expectedValue').value) : null;
+            const deviationPercent = document.getElementById('deviationPercent').value ? parseFloat(document.getElementById('deviationPercent').value) : null;
+            const confidenceScore = parseFloat(document.getElementById('confidenceScore').value);
+            const isResolved = document.getElementById('isResolved').checked;
+            
+            // Build payload
+            const payload = {
+                machine_id: machineId,
+                detected_at: new Date(detectedAt).toISOString(),
+                anomaly_type: anomalyType,
+                severity: severity,
+                confidence_score: confidenceScore,
+                is_resolved: isResolved
+            };
+            
+            // Add optional fields
+            if (metricName) payload.metric_name = metricName;
+            if (metricValue !== null) payload.metric_value = metricValue;
+            if (expectedValue !== null) payload.expected_value = expectedValue;
+            if (deviationPercent !== null) payload.deviation_percent = deviationPercent;
+            
+            try {
+                const response = await axios.post('/api/analytics/api/v1/anomaly/create', payload);
+                
+                // Success
+                resultBox.className = 'result-box success';
+                resultTitle.innerHTML = '<i class="bi bi-check-circle"></i> Anomaly Created Successfully!';
+                resultContent.textContent = JSON.stringify(response.data, null, 2);
+                
+                // Reset form after 2 seconds
+                setTimeout(() => {
+                    if (confirm('Anomaly created! Create another one?')) {
+                        location.reload();
+                    }
+                }, 2000);
+                
+            } catch (error) {
+                // Error
+                resultBox.className = 'result-box error';
+                resultTitle.innerHTML = '<i class="bi bi-x-circle"></i> Error Creating Anomaly';
+                
+                if (error.response) {
+                    resultContent.textContent = JSON.stringify(error.response.data, null, 2);
+                } else {
+                    resultContent.textContent = error.message;
+                }
+            }
+        });
+    </script>
+</body>
+</html>
