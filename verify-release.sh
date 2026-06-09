@@ -31,7 +31,7 @@ command -v grep >/dev/null 2>&1 || { echo "Missing required command: grep" >&2; 
 echo "HumanEnerDIA verification"
 echo "HumanEnerDIA: $HUMANERDIA_BASE_URL"
 echo "Analytics:    $ANALYTICS_BASE_URL"
-echo "OVOS:         $OVOS_BASE_URL"
+echo "OVOS:         $OVOS_BASE_URL (optional for EnMS-only)"
 echo
 
 if command -v docker >/dev/null 2>&1 && [[ -f docker-compose.yml ]]; then

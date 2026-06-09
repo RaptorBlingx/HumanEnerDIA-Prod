@@ -5,6 +5,8 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$ROOT_DIR"
 
 REQUESTED_SERVER_IP="${SERVER_IP:-}"
+REQUESTED_OVOS_BRIDGE_HOST="${OVOS_BRIDGE_HOST:-}"
+REQUESTED_OVOS_BRIDGE_PORT="${OVOS_BRIDGE_PORT:-}"
 SERVER_IP=""
 SERVER_IP_EXPLICIT=false
 NO_BUILD=false
@@ -12,7 +14,7 @@ NO_START=false
 
 usage() {
   cat <<'EOF'
-Usage: ./setup.sh [--server-ip HOST_OR_IP] [--no-build] [--no-start]
+Usage: ./setup.sh [--server-ip HOST_OR_IP] [--ovos-bridge-host HOST] [--ovos-bridge-port PORT] [--no-build] [--no-start]
 
 Creates a local .env from .env.example when needed, fills first-run placeholder
 secrets with generated values, validates Docker Compose, then builds and starts
@@ -21,6 +23,7 @@ the stack. Existing non-placeholder .env values are preserved.
 Examples:
   ./setup.sh
   ./setup.sh --server-ip 192.168.1.50
+  ./setup.sh --server-ip 192.168.1.50 --ovos-bridge-host host.docker.internal --ovos-bridge-port 5000
   SERVER_IP=energy-demo.local ./setup.sh
 EOF
 }
@@ -35,6 +38,14 @@ while [[ $# -gt 0 ]]; do
     --no-build)
       NO_BUILD=true
       shift
+      ;;
+    --ovos-bridge-host)
+      REQUESTED_OVOS_BRIDGE_HOST="${2:?--ovos-bridge-host requires a value}"
+      shift 2
+      ;;
+    --ovos-bridge-port)
+      REQUESTED_OVOS_BRIDGE_PORT="${2:?--ovos-bridge-port requires a value}"
+      shift 2
       ;;
     --no-start)
       NO_START=true
@@ -209,6 +220,14 @@ prepare_env() {
   if [[ "$env_created" == "true" || -z "$grafana_root_url" || "$grafana_root_url" == *'${SERVER_IP}'* || "$grafana_root_url" == *"<CHANGE_ME"* || "$SERVER_IP_EXPLICIT" == "true" ]]; then
     set_env_value GRAFANA_ROOT_URL "http://${SERVER_IP}:${nginx_port}/grafana"
   fi
+
+  if [[ -n "$REQUESTED_OVOS_BRIDGE_HOST" ]]; then
+    set_env_value OVOS_BRIDGE_HOST "$REQUESTED_OVOS_BRIDGE_HOST"
+  fi
+
+  if [[ -n "$REQUESTED_OVOS_BRIDGE_PORT" ]]; then
+    set_env_value OVOS_BRIDGE_PORT "$REQUESTED_OVOS_BRIDGE_PORT"
+  fi
 }
 
 compose_files=(-f docker-compose.yml)
@@ -247,14 +266,25 @@ if [[ "$NO_START" != "true" ]]; then
   fi
 fi
 
+if [[ "$NO_START" == "true" ]]; then
+  STATUS_LABEL="Prepared"
+else
+  STATUS_LABEL="Started"
+fi
+
 cat <<EOF
-Started stack with compose files: ${compose_files[*]}
+${STATUS_LABEL} stack with compose files: ${compose_files[*]}
 
 Access:
   Portal:      http://${SERVER_IP}:$(get_env_or_default NGINX_HTTP_PORT 8080)
   Grafana:     http://${SERVER_IP}:$(get_env_or_default NGINX_HTTP_PORT 8080)/grafana
   Analytics:   http://${SERVER_IP}:$(get_env_or_default ANALYTICS_PORT 8001)/api/v1/health
-  OVOS bridge: http://${SERVER_IP}:$(get_env_or_default OVOS_BRIDGE_EXTERNAL_PORT 5000)/health
+
+OVOS integration:
+  API URL for separate OVOS package:
+    http://${SERVER_IP}:$(get_env_or_default ANALYTICS_PORT 8001)/api/v1
+  EnMS voice proxy target:
+    http://$(get_env_or_default OVOS_BRIDGE_HOST host.docker.internal):$(get_env_or_default OVOS_BRIDGE_PORT 5000)
 
 Generated first-run credentials are stored in .env. For production, rotate the
 generated values, set DNS/TLS, and keep .env out of version control.

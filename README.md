@@ -1,94 +1,80 @@
-# HumanEnerDIA
+# HumanEnerDIA EnMS
 
-HumanEnerDIA is a Docker Compose stack for industrial energy management. It
-includes the web portal, analytics service, authentication service, Grafana
-dashboards, Node-RED ingestion, MQTT, Redis, PostgreSQL/TimescaleDB, and a demo
-factory simulator.
+This package runs the HumanEnerDIA energy-management platform without an
+embedded OVOS runtime.
 
-## Requirements
+Use this product when you want the EnMS backend, portal, analytics API,
+Grafana dashboards, MQTT/Node-RED pipeline, simulator, authentication service,
+and web chatbot, and you want to run the OVOS assistant as a separate product.
 
-- Docker Engine 20.10+
-- Docker Compose v2
-- Linux, macOS, or Windows with WSL2
-- 8 GB RAM recommended
-- 15 GB free disk space recommended
+## Product Split
 
-## Start
+- `HumanEnerDIA-EnMS-v1.0.0`: EnMS platform only.
+- `HumanEnerDIA-OVOS-skill-v1.0.0`: OVOS runtime and HumanEnerDIA skill only.
+- `HumanEnerDIA-full-stack-v1.0.0`: EnMS plus embedded OVOS in one bundle.
+
+## Quick Start
 
 ```bash
-git clone https://github.com/RaptorBlingx/HumanEnerDIA-Prod.git
-cd HumanEnerDIA-Prod
+tar -xzf HumanEnerDIA-EnMS-v1.0.0.tar.gz
+cd HumanEnerDIA-EnMS-v1.0.0
 ./setup.sh
+./verify-release.sh
 ```
 
-For browser access from another machine, pass the host name or IP that users
-will open:
+For browser access from another machine:
 
 ```bash
-./setup.sh --server-ip energy-demo.local
+./setup.sh --server-ip <enms-hostname-or-ip>
 ```
 
-`setup.sh` creates `.env` when needed, generates local first-run secrets,
-validates Docker Compose, builds the images, and starts the stack. Generated
-credentials are stored in `.env`; keep that file private and rotate the values
-before public exposure.
+Open:
 
-## Open
+- Portal: `http://<enms-host>:8080`
+- Grafana: `http://<enms-host>:8080/grafana`
+- Analytics API health: `http://<enms-host>:8001/api/v1/health`
 
-- Portal: `http://localhost:8080`
-- Grafana: `http://localhost:8080/grafana`
-- Analytics UI: `http://localhost:8080/analytics/ui/`
-- Analytics API health: `http://localhost:8001/api/v1/health`
+## Pair With The OVOS Product
 
-## Verify
+Start EnMS first, then run the OVOS package with this EnMS API URL:
 
 ```bash
-./verify.sh
+./setup.sh --enms-api-url http://<enms-host>:8001/api/v1
 ```
 
-The verifier checks Docker Compose configuration, the Nginx health endpoint,
-and the analytics health endpoint. If an OVOS bridge is available at
-`http://localhost:5000`, it also runs the OVOS health and smoke-query checks.
-
-## Stop
+If both products run on the same laptop, run the OVOS package with:
 
 ```bash
-docker compose down
+./setup.sh --enms-api-url http://host.docker.internal:8001/api/v1
 ```
 
-To remove runtime volumes as well:
+To let the EnMS portal call a separately running OVOS bridge on the same host,
+start or re-run this EnMS setup with:
 
 ```bash
-docker compose down -v
+./setup.sh --ovos-bridge-host host.docker.internal --ovos-bridge-port 5000
 ```
 
-## Clean Reinstall
-
-Use this before retesting on a machine that already ran HumanEnerDIA:
+For a remote OVOS host:
 
 ```bash
-docker compose down -v --remove-orphans || true
-docker rm -f enms-nginx enms-postgres enms-mqtt enms-redis enms-simulator enms-nodered enms-grafana enms-analytics enms-auth-service enms-rasa-actions enms-rasa enms-chatbot enms-ovos ovos-enms enms-query-service 2>/dev/null || true
-docker volume rm enms-postgres-data enms-grafana-data enms-mqtt-data enms-mqtt-logs enms-redis-data enms-nodered-data enms-ovos-logs enms-ovos-supervisor-logs postgres-data grafana-data mqtt-data mqtt-logs redis-data nodered-data ovos-logs supervisor-logs 2>/dev/null || true
-docker network rm enms-network 2>/dev/null || true
-docker builder prune -af
+./setup.sh --ovos-bridge-host <ovos-hostname-or-ip> --ovos-bridge-port 5000
 ```
 
-On a dedicated test laptop where it is acceptable to remove all unused Docker
-state for every project:
+Read `OVOS_INTEGRATION.md` for the full two-package wiring guide.
 
-```bash
-docker system prune -af --volumes
-docker builder prune -af
-```
+## What Is Not Included
 
-## Production Notes
+This artifact does not include:
 
-- Rotate generated `.env` secrets before production exposure.
-- Configure DNS, TLS, firewall rules, backups, and host monitoring.
-- Do not commit or publish `.env`, Docker volumes, logs, caches, or local model
-  outputs.
+- `ovos-stack/`
+- `docker-compose.ovos.yml`
+- OVOS runtime containers
+- OVOS skill source
+- optional GGUF model files
+- live `.env` files, Docker volumes, logs, caches, tests, or internal delivery docs
 
 ## License
 
-HumanEnerDIA is released under the MIT License. See `LICENSE`.
+HumanEnerDIA EnMS is distributed under the MIT License. See `LICENSE`.
+
